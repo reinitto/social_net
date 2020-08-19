@@ -24,9 +24,13 @@ app.use(
     secret: "fraggle-rock",
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      secure: false,
+      maxAge: 24 * 60 * 60 * 1000,
+    },
     store: new MongoStore({
       mongooseConnection: mongoose.connection,
-      touchAfter: 24 * 3600,
+      ttl: 24 * 60 * 60,
     }),
   })
 );

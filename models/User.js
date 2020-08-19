@@ -32,7 +32,10 @@ var UserSchema = new Schema({
   profile_photo: { type: String },
   cover_photo: { type: String },
   bio: { type: String },
-  social_profiles: { type: [String] },
+  social_profiles: {
+    type: "mixed",
+    default: { facebook: "", instagram: "", twitter: "" },
+  },
   interests: { type: [String] },
   created: { type: Date, default: Date.now },
 });

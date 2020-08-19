@@ -17,7 +17,6 @@ import { useUser } from "../../context/user";
 
 const useStyles = makeStyles((theme) => {
   console.log("theme", theme);
-
   return {
     root: {
       flexGrow: 1,
@@ -28,8 +27,11 @@ const useStyles = makeStyles((theme) => {
     link: {
       flexGrow: 1,
       textTransform: "capitalize",
-      color: theme.palette.primary.contrastText,
       textDecoration: "none",
+      color: theme.palette.common.black,
+    },
+    title: {
+      color: theme.palette.primary.contrastText,
     },
   };
 });
@@ -67,7 +69,7 @@ function Navbar() {
           >
             <MenuIcon />
           </IconButton>
-          <Link to="/" className={classes.link}>
+          <Link to="/" className={`${classes.link} ${classes.title}`}>
             <Typography variant="h6">{appName.replace("-", " ")}</Typography>
           </Link>
           {user && (
@@ -96,8 +98,12 @@ function Navbar() {
                 open={open}
                 onClose={handleClose}
               >
+                <MenuItem onClick={handleClose}>
+                  <Link className={classes.link} to="/account">
+                    My account
+                  </Link>
+                </MenuItem>
                 <MenuItem onClick={handleClose}>Profile</MenuItem>
-                <MenuItem onClick={handleClose}>My account</MenuItem>
                 <MenuItem onClick={logout}>Logout</MenuItem>
               </Menu>
             </div>
