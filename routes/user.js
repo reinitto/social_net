@@ -148,5 +148,24 @@ module.exports = function () {
     }
   });
 
+  router.get("/newsfeed", async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const followings = await Follow.find({ user: userId }).exec();
+      let newsFeed = [];
+      for (let following of followings) {
+        let posts = await Post.find({ creator: following.target })
+          .sort({ created: -1 })
+          .limit(100)
+          .exec();
+        newsFeed = [...newsFeed, ...posts];
+      }
+      res.json({ newsFeed });
+    } catch (error) {
+      console.log(error);
+      res.json({ error: `Can't get newsfeed` });
+    }
+  });
+
   return router;
 };
