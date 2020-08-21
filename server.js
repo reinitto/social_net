@@ -10,7 +10,21 @@ const passport = require("passport");
 const cors = require("cors");
 const auth = require("./routes/auth");
 const user = require("./routes/user");
+const post = require("./routes/post");
 const initializePassport = require("./passport/passport-config");
+
+// MIDDLEWARES
+const logger = (req, res, next) => {
+  console.log("req.session", req.session);
+  console.log("req.user", req.user);
+  return next();
+};
+const isAuthenticated = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect("/");
+};
 ////// END IMPORTS ////////////
 const PORT = process.env.PORT || 5000;
 initializePassport(passport);
@@ -37,6 +51,10 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
+// app.use(logger);
+app.use("/api/auth", auth(passport));
+app.use("/api/user", isAuthenticated, user());
+app.use("/api/post", isAuthenticated, post());
 //Configure Mongoose
 mongoose.connect(
   process.env.MONGODB_URI,
@@ -48,22 +66,6 @@ mongoose.connect(
     console.log("mongodb connected succesfully");
   }
 );
-// LOGGING MIDDLEWARE
-const logger = (req, res, next) => {
-  console.log("req.session", req.session);
-  console.log("req.user", req.user);
-  return next();
-};
-const isAuthenticated = (req, res, next) => {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  res.redirect("/");
-};
-// app.use(logger);
-app.use("/api/auth", auth(passport));
-app.use("/api/user", isAuthenticated, user(passport));
-
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "client", "build")));
 
