@@ -3,7 +3,6 @@ import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import {
   Avatar,
   Button,
-  CssBaseline,
   TextField,
   Grid,
   Typography,
@@ -85,7 +84,6 @@ export default function SignIn() {
 
   return (
     <Container component="main" maxWidth="xs">
-      <CssBaseline />
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>
           <LockOutlinedIcon />

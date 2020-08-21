@@ -1,13 +1,13 @@
-import React, { useEffect, useState, Fragment } from "react";
+import React, { Fragment } from "react";
 import EditProfile from "../components/EditProfile";
 
-function Profile() {
+function Account() {
   return (
     <Fragment>
-      Profile Page
+      Account Page
       <EditProfile />
     </Fragment>
   );
 }
 
-export default Profile;
+export default Account;

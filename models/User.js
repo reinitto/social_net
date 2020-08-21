@@ -26,6 +26,7 @@ var UserSchema = new Schema({
     required: true,
     minlength: [8, "Invalid password"],
     maxlength: [255, "Invalid password"],
+    select: false,
   },
   first_name: { type: String },
   last_name: { type: String },
@@ -36,7 +37,6 @@ var UserSchema = new Schema({
     type: "mixed",
     default: { facebook: "", instagram: "", twitter: "" },
   },
-  interests: { type: [String] },
   created: { type: Date, default: Date.now },
 });
 

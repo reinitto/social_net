@@ -49,9 +49,29 @@ module.exports = function (passport) {
       try {
         await user.save();
         passport.authenticate("local")(req, res, async () => {
-          const { email, username, social_profiles, interests } = req.user;
+          const {
+            email,
+            username,
+            social_profiles,
+            first_name,
+            last_name,
+            bio,
+            cover_photo,
+            profile_photo,
+          } = req.user;
           await sendRegistrationEmail({ email, username });
-          res.json({ user: { email, username, social_profiles, interests } });
+          res.json({
+            user: {
+              email,
+              username,
+              social_profiles,
+              first_name,
+              last_name,
+              bio,
+              cover_photo,
+              profile_photo,
+            },
+          });
         });
       } catch (err) {
         console.log("save err", err.message);
@@ -64,16 +84,56 @@ module.exports = function (passport) {
     if (!req.user) {
       res.json({ user: null, error: "User not found" });
     }
-    const { email, username, social_profiles, interests } = req.user;
-    res.json({ user: { email, username, social_profiles, interests } });
+    const {
+      email,
+      username,
+      social_profiles,
+      first_name,
+      last_name,
+      bio,
+      cover_photo,
+      profile_photo,
+    } = req.user;
+    res.json({
+      user: {
+        email,
+        username,
+        social_profiles,
+        first_name,
+        last_name,
+        bio,
+        cover_photo,
+        profile_photo,
+      },
+    });
   });
 
   router.get("/user", function (req, res) {
     if (!req.user) {
       res.json({ user: null, error: "User not found" });
     } else {
-      const { email, username, social_profiles, interests } = req.user;
-      res.json({ user: { email, username, social_profiles, interests } });
+      const {
+        email,
+        username,
+        social_profiles,
+        first_name,
+        last_name,
+        bio,
+        cover_photo,
+        profile_photo,
+      } = req.user;
+      res.json({
+        user: {
+          email,
+          username,
+          social_profiles,
+          first_name,
+          last_name,
+          bio,
+          cover_photo,
+          profile_photo,
+        },
+      });
     }
   });
 

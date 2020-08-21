@@ -9,6 +9,7 @@ const mongoose = require("mongoose");
 const passport = require("passport");
 const cors = require("cors");
 const auth = require("./routes/auth");
+const user = require("./routes/user");
 const initializePassport = require("./passport/passport-config");
 ////// END IMPORTS ////////////
 const PORT = process.env.PORT || 5000;
@@ -22,7 +23,7 @@ app.use(bodyParser.json());
 app.use(
   session({
     secret: "fraggle-rock",
-    resave: false,
+    resave: true,
     saveUninitialized: false,
     cookie: {
       secure: false,
@@ -47,13 +48,21 @@ mongoose.connect(
     console.log("mongodb connected succesfully");
   }
 );
-
-app.use((req, res, next) => {
+// LOGGING MIDDLEWARE
+const logger = (req, res, next) => {
   console.log("req.session", req.session);
   console.log("req.user", req.user);
   return next();
-});
+};
+const isAuthenticated = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect("/");
+};
+// app.use(logger);
 app.use("/api/auth", auth(passport));
+app.use("/api/user", isAuthenticated, user(passport));
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "client", "build")));

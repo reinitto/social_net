@@ -4,7 +4,6 @@ import { useUser } from "../context/user";
 import {
   Avatar,
   Button,
-  CssBaseline,
   TextField,
   Grid,
   Typography,
@@ -76,7 +75,6 @@ export default function SignUp() {
 
   return (
     <Container component="main" maxWidth="xs">
-      <CssBaseline />
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>
           <LockOutlinedIcon />

@@ -1,37 +1,121 @@
 import React, { useState, useEffect } from "react";
 import { useUser } from "../context/user";
 import {
-  Avatar,
   Button,
   TextField,
   Grid,
   Typography,
   makeStyles,
-  Container,
 } from "@material-ui/core";
-function EditProfile() {
-  const [widgetStatus, setWidgetStatus] = useState(false);
-  const [widget, setWidget] = useState(null);
-  const [name, setName] = useState({ firstName: "", lastName: "" });
-  const [info, setInfo] = useState({
-    bio: "",
-    interests: "",
-  });
-  const [pictures, setPictures] = useState({ profile: "", background: "" });
-  const [social_accounts, setSocialAccounts] = useState({});
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const { user } = useUser();
+import { ProfilePicture } from "./ProfilePicture";
+import { BackgroundPicture } from "./BackgroundPicture";
 
-  const toggleWidget = () => {
-    if (widgetStatus) {
-      widget.hide();
-      setWidgetStatus(false);
-    } else {
-      widget.open();
-      setWidgetStatus(true);
-    }
+//   styles: {
+//     palette: {
+//       window: "#FFF",
+//       windowBorder: "#90A0B3",
+//       tabIcon: "#0E2F5A",
+//       menuIcons: "#5A616A",
+//       textDark: "#000000",
+//       textLight: "#FFFFFF",
+//       link: "#0078FF",
+//       action: "#FF620C",
+//       inactiveTabIcon: "#0E2F5A",
+//       error: "#F44235",
+//       inProgress: "#0078FF",
+//       complete: "#20B832",
+//       sourceBg: "#E4EBF1",
+//     },
+//     fonts: {
+//       "'Cute Font', cursive":
+//         "https://fonts.googleapis.com/css?family=Cute+Font",
+//     },
+//   },
+
+const useStyles = makeStyles((theme) => {
+  return {
+    paper: {
+      marginTop: theme.spacing(8),
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    },
+    form: {
+      width: "100%", // Fix IE 11 issue.
+      marginTop: theme.spacing(3),
+      display: "flex",
+      flexWrap: "wrap",
+      justifyContent: "center",
+      padding: theme.spacing(1),
+      "&>div": {
+        padding: theme.spacing(1),
+        maxWidth: "750px",
+        justifyContent: "center",
+      },
+    },
+    submit: {
+      margin: theme.spacing(3, 0, 2),
+    },
+    gridItem: {
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    },
+    success: {
+      color: theme.palette.success.main,
+    },
+    error: {
+      color: theme.palette.error.main,
+    },
+    imageSelectContainer: {
+      display: "flex",
+      justifyContent: "space-between",
+      width: "100%",
+    },
+    backgroundImageContainer: {
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      width: "100%",
+      maxHeight: "300px",
+      margin: "auto",
+    },
+    avatarContainer: {
+      maxWidth: "150px",
+      maxHeight: "150px",
+      overflow: "hidden",
+      borderRadius: "50%",
+    },
+    uploadButtons: {
+      flexGrow: 1,
+      flexShrink: 1,
+      margin: "4px",
+    },
+    subTitle: {
+      width: "100%",
+      textAlign: "left",
+      fontWeight: theme.typography.fontWeightBold,
+      marginBottom: "1rem",
+      marginTop: "1rem",
+    },
   };
+});
+
+function EditProfile() {
+  const [message, setMessage] = useState(["", ""]);
+  //   START USER DETAILS INPUTS
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [username, setUsername] = useState("");
+  const [bio, setBio] = useState("");
+  const [profileImage, setProfileImage] = useState("");
+  const [backgroundImage, setBackgroundImage] = useState("");
+  const [social_accounts, setSocialAccounts] = useState({});
+  const [email, setEmail] = useState("");
+  //   END USER DETAILS INPUTS
+  const { user } = useUser();
+  const classes = useStyles();
+
   useEffect(() => {
     const setFormState = () => {
       const {
@@ -43,91 +127,256 @@ function EditProfile() {
         cover_photo,
         bio,
         social_profiles,
-        interests,
       } = user;
-      setName({ firstName: first_name || "", lastName: last_name || "" });
-      setInfo({
-        bio,
-        interests,
-      });
-      setPictures({ profile: profile_photo, background: cover_photo });
-      setUsername(username);
+      setFirstName(first_name || "");
+      setLastName(last_name || "");
+      setBio(bio || "");
+      setProfileImage(profile_photo || "");
+      setBackgroundImage(cover_photo || "");
+      setUsername(username || "");
       setEmail(email);
       setSocialAccounts(social_profiles);
     };
     if (user) {
       setFormState();
     }
+  }, [user]);
+
+  let uploadProfilePic = () => {
     let widget = window.cloudinary.createUploadWidget(
       {
         cloudName: "sunshinephoto",
         uploadPreset: "cxettook",
+        cropping: true,
         clientAllowedFormats: ["png", "gif", "jpeg"],
         showCompletedButton: true,
         multiple: false,
+        sources: ["local", "url", "camera"],
       },
       (error, result) => {
-        checkUploadResult(error, result);
+        if (error) {
+          console.log("upload error", error);
+          setMessage(["Upload Error! Try again", "error"]);
+        } else {
+          if (result.event === "success") {
+            const image_url = result.info.secure_url;
+            setProfileImage(image_url);
+            submitProfileEdit({
+              updates_for: "profile_picture",
+              data: { profileImage: image_url },
+            });
+          }
+        }
       }
     );
-    setWidget(widget);
-  }, [user]);
-
-  let checkUploadResult = (err, res) => {
-    if (err) {
-      console.log("upload error", err);
-    } else {
-      if (res.event === "success") {
-        console.log("upload successful");
-        console.log("result", res);
-        const url = res.info.secure_url;
+    widget.open();
+  };
+  let uploadBackgroundPic = () => {
+    let widget = window.cloudinary.createUploadWidget(
+      {
+        cloudName: "sunshinephoto",
+        uploadPreset: "cxettook",
+        cropping: true,
+        clientAllowedFormats: ["png", "gif", "jpeg"],
+        showCompletedButton: true,
+        multiple: false,
+        sources: ["local", "url", "camera"],
+      },
+      (error, result) => {
+        if (error) {
+          console.log("upload error", error);
+          setMessage(["Upload Error! Try again", "error"]);
+        } else {
+          if (result.event === "success") {
+            const image_url = result.info.secure_url;
+            setBackgroundImage(image_url);
+            submitProfileEdit({
+              data: { backgroundImage: image_url },
+              updates_for: "background_picture",
+            });
+          }
+        }
       }
-    }
+    );
+    widget.open();
   };
 
+  const updateInfo = (e) => {
+    e.preventDefault();
+    submitProfileEdit({
+      data: {
+        username,
+        email,
+        bio,
+        first_name: firstName,
+        last_name: lastName,
+        social_profiles: social_accounts,
+      },
+      updates_for: "info",
+    });
+  };
+
+  const submitProfileEdit = async ({ data, updates_for = "info" }) => {
+    setMessage(["", ""]);
+    const url = "/api/user/edit";
+    const body = {
+      data,
+      updates_for,
+    };
+    body.data.email = email;
+    const options = {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    };
+    const res = await fetch(url, options);
+    const res_data = await res.json();
+    const { error, status } = res_data;
+    if (error) {
+      console.log("error", error);
+      setMessage(["Update Error! Please try again!", "error"]);
+    } else if (status === "ok") {
+      setMessage(["Update Successful!", "success"]);
+    }
+  };
   return (
-    <div>
-      Edit Profile
-      <form noValidate autoComplete="off">
-        <Button onClick={toggleWidget}>Upload Profile Pic</Button>
-        <TextField
-          label="First Name"
-          value={name.firstName}
-          onChange={(e) => setName({ ...name, firstName: e.target.value })}
-        />
-        <TextField
-          label="Last Name"
-          value={name.lastName}
-          onChange={(e) => setName({ ...name, lastName: e.target.value })}
-        />
-        <TextField
-          label="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <TextField
-          label="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <TextField
-          label="bio"
-          multiline
-          value={info.bio}
-          onChange={(e) => setInfo({ ...info, bio: e.target.value })}
-        />
-        {Object.keys(social_accounts).map((soc_prof) => (
+    <div className={classes.paper}>
+      <Typography variant="h3">Edit Profile</Typography>
+      <Typography className={classes[message[1]] || ""} variant="body2">
+        {message[0]}
+      </Typography>
+      <form noValidate autoComplete="off" className={classes.form}>
+        <Grid container item xs={12}>
+          <Grid item xs={12} className={classes.gridItem}>
+            <div className={classes.imageSelectContainer}>
+              <Typography variant="h5" className={classes.subTitle}>
+                Profile Picture
+              </Typography>
+              <Button
+                variant="outlined"
+                color="primary"
+                size="small"
+                onClick={uploadProfilePic}
+                className={classes.uploadButtons}
+              >
+                Change Profile Picture
+              </Button>
+            </div>
+            <div className={classes.avatarContainer}>
+              <ProfilePicture src={profileImage} />
+            </div>
+          </Grid>
+          <Grid item xs={12} className={classes.gridItem}>
+            <div className={classes.imageSelectContainer}>
+              <Typography variant="h5" className={classes.subTitle}>
+                Background Photo
+              </Typography>
+              <Button
+                variant="outlined"
+                color="primary"
+                size="small"
+                className={classes.uploadButtons}
+                onClick={uploadBackgroundPic}
+              >
+                Change Background Photo
+              </Button>
+            </div>
+            <div className={classes.backgroundImageContainer}>
+              <BackgroundPicture
+                src={backgroundImage}
+                style={{
+                  backgroundAttachment: "initial",
+                }}
+              />
+            </div>
+          </Grid>
+        </Grid>
+        <Grid container>
+          <Typography className={classes.subTitle} variant="h5">
+            Bio
+          </Typography>
+
           <TextField
-            label={soc_prof}
-            value={social_accounts[soc_prof]}
-            onChange={(e) =>
-              setSocialAccounts({
-                ...social_accounts,
-                [soc_prof]: e.target.value,
-              })
-            }
+            fullWidth
+            label="Bio"
+            multiline
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
           />
-        ))}
+          <Grid container item xs={12} justify="space-between">
+            <Typography variant="h5" className={classes.subTitle}>
+              Personal Info
+            </Typography>
+            <TextField
+              variant="outlined"
+              name="First Name"
+              type="text"
+              autoComplete="given-name"
+              label="First Name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+            <TextField
+              className={classes.textField}
+              variant="outlined"
+              name="Last Name"
+              type="text"
+              autoComplete="family-name"
+              label="Last Name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+            />
+            <TextField
+              variant="outlined"
+              name="Username"
+              type="text"
+              autoComplete="nickname"
+              label="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </Grid>
+          <TextField
+            fullWidth
+            variant="outlined"
+            autoComplete="email"
+            margin="normal"
+            label="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+
+          <Grid container item xs={12} justify="space-between">
+            <Typography variant="h5" className={classes.subTitle}>
+              Social Accounts
+            </Typography>
+            {Object.keys(social_accounts).map((soc_prof) => (
+              <TextField
+                label={soc_prof}
+                variant="outlined"
+                value={social_accounts[soc_prof]}
+                onChange={(e) =>
+                  setSocialAccounts({
+                    ...social_accounts,
+                    [soc_prof]: e.target.value,
+                  })
+                }
+              />
+            ))}
+          </Grid>
+          <Button
+            variant="contained"
+            color="primary"
+            fullWidth
+            type="submit"
+            className={classes.submit}
+            onClick={updateInfo}
+          >
+            Save
+          </Button>
+        </Grid>
       </form>
     </div>
   );
