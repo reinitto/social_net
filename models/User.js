@@ -37,6 +37,7 @@ var UserSchema = new Schema({
     type: "mixed",
     default: { facebook: "", instagram: "", twitter: "" },
   },
+  follow: { type: [Schema.Types.ObjectId] },
   created: { type: Date, default: Date.now },
 });
 
