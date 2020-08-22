@@ -6,14 +6,9 @@ module.exports = function () {
   const router = express.Router();
 
   router.post("/edit", (req, res) => {
-    const {
-      data: { email },
-      data,
-      updates_for,
-    } = req.body;
+    const { data, updates_for } = req.body;
+    const { email } = req.user;
     if (updates_for === "info") {
-      console.log("updating info");
-
       const {
         email,
         username,
@@ -43,7 +38,6 @@ module.exports = function () {
         }
       );
     } else if (updates_for === "profile_picture") {
-      console.log("updating profile_picture");
       const { profileImage } = data;
       User.updateOne(
         { email },
@@ -62,8 +56,6 @@ module.exports = function () {
         }
       );
     } else if (updates_for === "background_picture") {
-      console.log("updating background_picture");
-
       const { backgroundImage } = data;
       User.updateOne(
         { email },
@@ -87,15 +79,6 @@ module.exports = function () {
           "Please specify if the updates are for info profile_picture or background_picture",
       });
     }
-  });
-
-  router.get("/feed", async (req, res) => {
-    let follows = await Follow.find({ user: req.user.id }).exec();
-
-    let followings = follows.map((follow) => follow.target);
-
-    let feeds = await Post.find({ user: followings }).exec();
-    res.json({ newsFeed: feeds });
   });
 
   router.post("/follow", async (req, res) => {
@@ -147,6 +130,15 @@ module.exports = function () {
       res.json({ error: "Unfollowing failed!" });
     }
   });
+
+  // router.get("/feed", async (req, res) => {
+  //   let follows = await Follow.find({ user: req.user.id }).exec();
+
+  //   let followings = follows.map((follow) => follow.target);
+
+  //   let feeds = await Post.find({ user: followings }).exec();
+  //   res.json({ newsFeed: feeds });
+  // });
 
   router.get("/newsfeed", async (req, res) => {
     try {

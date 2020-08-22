@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useUser } from "../context/user";
+import ImageUpload from "./ImageUpload";
 import {
   Button,
   TextField,
@@ -142,63 +143,32 @@ function EditProfile() {
     }
   }, [user]);
 
-  let uploadProfilePic = () => {
-    let widget = window.cloudinary.createUploadWidget(
-      {
-        cloudName: "sunshinephoto",
-        uploadPreset: "cxettook",
-        cropping: true,
-        clientAllowedFormats: ["png", "gif", "jpeg"],
-        showCompletedButton: true,
-        multiple: false,
-        sources: ["local", "url", "camera"],
-      },
-      (error, result) => {
-        if (error) {
-          console.log("upload error", error);
-          setMessage(["Upload Error! Try again", "error"]);
-        } else {
-          if (result.event === "success") {
-            const image_url = result.info.secure_url;
-            setProfileImage(image_url);
-            submitProfileEdit({
-              updates_for: "profile_picture",
-              data: { profileImage: image_url },
-            });
-          }
-        }
-      }
-    );
-    widget.open();
+  let uploadProfilePicCallback = {
+    success: (result) => {
+      const image_url = result.info.secure_url;
+      setProfileImage(image_url);
+      submitProfileEdit({
+        updates_for: "profile_picture",
+        data: { profileImage: image_url },
+      });
+    },
+    error: (error) => {
+      setMessage(["Upload Error! Try again", "error"]);
+    },
   };
-  let uploadBackgroundPic = () => {
-    let widget = window.cloudinary.createUploadWidget(
-      {
-        cloudName: "sunshinephoto",
-        uploadPreset: "cxettook",
-        cropping: true,
-        clientAllowedFormats: ["png", "gif", "jpeg"],
-        showCompletedButton: true,
-        multiple: false,
-        sources: ["local", "url", "camera"],
-      },
-      (error, result) => {
-        if (error) {
-          console.log("upload error", error);
-          setMessage(["Upload Error! Try again", "error"]);
-        } else {
-          if (result.event === "success") {
-            const image_url = result.info.secure_url;
-            setBackgroundImage(image_url);
-            submitProfileEdit({
-              data: { backgroundImage: image_url },
-              updates_for: "background_picture",
-            });
-          }
-        }
-      }
-    );
-    widget.open();
+
+  let uploadBackgroundPicCalback = {
+    success: (result) => {
+      const image_url = result.info.secure_url;
+      setBackgroundImage(image_url);
+      submitProfileEdit({
+        data: { backgroundImage: image_url },
+        updates_for: "background_picture",
+      });
+    },
+    error: (error) => {
+      setMessage(["Upload Error! Try again", "error"]);
+    },
   };
 
   const updateInfo = (e) => {
@@ -254,15 +224,17 @@ function EditProfile() {
               <Typography variant="h5" className={classes.subTitle}>
                 Profile Picture
               </Typography>
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
-                onClick={uploadProfilePic}
-                className={classes.uploadButtons}
-              >
-                Change Profile Picture
-              </Button>
+              <ImageUpload
+                successCallback={uploadProfilePicCallback.success}
+                errorCallback={uploadProfilePicCallback.error}
+                buttonText="Change Profile Picture"
+                buttonProps={{
+                  variant: "outlined",
+                  color: "primary",
+                  size: "small",
+                  className: classes.uploadButtons,
+                }}
+              />
             </div>
             <div className={classes.avatarContainer}>
               <ProfilePicture src={profileImage} />
@@ -273,15 +245,17 @@ function EditProfile() {
               <Typography variant="h5" className={classes.subTitle}>
                 Background Photo
               </Typography>
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
-                className={classes.uploadButtons}
-                onClick={uploadBackgroundPic}
-              >
-                Change Background Photo
-              </Button>
+              <ImageUpload
+                successCallback={uploadBackgroundPicCalback.success}
+                errorCallback={uploadBackgroundPicCalback.error}
+                buttonText="Change Background Picture"
+                buttonProps={{
+                  variant: "outlined",
+                  color: "primary",
+                  size: "small",
+                  className: classes.uploadButtons,
+                }}
+              />
             </div>
             <div className={classes.backgroundImageContainer}>
               <BackgroundPicture

@@ -30,25 +30,3 @@ module.exports = function () {
   });
   return router;
 };
-
-// router.post("/tweet", async (req, res, next) => {
-//   let post = new Post();
-//   post.creator = "joker";
-//   post.body = "Hello my name is joker";
-//   post.save();
-//   let post = await Post.create({});
-
-//   let follows = await Follow.find({ target: req.user.id }).exec();
-
-//   let newFeeds = follows.map((follow) => {
-//     return {
-//       user: follow.user,
-//       post: post.id,
-//     };
-//   });
-//   await Newsfeed.insertMany(newFeeds);
-// });
-
-// router.get("/feed", async (req, res, next) => {
-//   let feeds = await Newsfeed.find({ user: req.user.id }).exec();
-// });

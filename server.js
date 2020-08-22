@@ -41,7 +41,7 @@ app.use(
     saveUninitialized: false,
     cookie: {
       secure: false,
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 24 * 60 * 60 * 30,
     },
     store: new MongoStore({
       mongooseConnection: mongoose.connection,
