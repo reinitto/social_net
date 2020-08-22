@@ -5,12 +5,10 @@ module.exports = function () {
 
   router.post("/submit", async (req, res) => {
     try {
-      if (!req.body || !req.body.post || !req.body.post.body) {
+      if (!req.body || !req.body || !req.body.body) {
         res.status(422).json({ error: "Missing required parameters" });
       }
-      const {
-        post: { body, image },
-      } = req.body;
+      const { body, image } = req.body;
       const { _id } = req.user;
       const newPost = new Post({
         body,

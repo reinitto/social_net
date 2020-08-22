@@ -4,7 +4,11 @@ function ImageUpload({
   successCallback,
   errorCallback,
   buttonText,
-  buttonProps,
+  buttonProps = {
+    variant: "outlined",
+    color: "primary",
+    size: "small",
+  },
 }) {
   let openWidget = () => {
     let widget = window.cloudinary.createUploadWidget(
