@@ -7,7 +7,7 @@ import CardMedia from "@material-ui/core/CardMedia";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import Divider from "@material-ui/core/Divider";
-import ThumbUpAltIcon from "@material-ui/icons/ThumbUpAlt";
+import Comments from "./Comments";
 import ThumbUpAltOutlinedIcon from "@material-ui/icons/ThumbUpAltOutlined";
 import Typography from "@material-ui/core/Typography";
 
@@ -17,13 +17,12 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     alignItems: "center",
     maxWidth: 345,
-    maxHeight: 500,
     padding: theme.spacing(1),
     margin: theme.spacing(1),
   },
   media: {
     maxWidth: "100%",
-    maxHeight: "80%",
+    maxHeight: 500,
     overflow: "hidden",
     margin: 4,
   },
@@ -89,6 +88,7 @@ export default function PostCard({ post }) {
         </Button>
       </CardActions>
       <Divider variant="fullWidth" flexItem style={{ height: "1px" }} />
+      <Comments comments={post.comments} />
       <CardActions className={classes.actions}>
         <TextField
           //   variant="filled"
