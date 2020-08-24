@@ -1,17 +1,7 @@
 import React from "react";
 import dayjs from "dayjs";
 import { makeStyles } from "@material-ui/core/styles";
-import {
-  SvgIcon,
-  Tooltip,
-  CardActions,
-  CardContent,
-  CardMedia,
-  Button,
-  Typography,
-  Paper,
-  Avatar,
-} from "@material-ui/core";
+import { Tooltip, Typography, Paper, Collapse } from "@material-ui/core";
 import AccountCircleOutlinedIcon from "@material-ui/icons/AccountCircleOutlined";
 import ThumbUpIcon from "@material-ui/icons/ThumbUp";
 
@@ -30,6 +20,7 @@ const useCommentsStyles = makeStyles((theme) => ({
   commentContent: {
     display: "flex",
     flexDirection: "column",
+    maxWidth: "75%",
   },
   commentText: {
     position: "relative",
@@ -41,13 +32,18 @@ const useCommentsStyles = makeStyles((theme) => ({
     paddingRight: theme.spacing(1),
   },
   commentLikes: {
-    bottom: -10,
-    right: -20,
+    bottom: -15,
+    right: -25,
     zIndex: 0,
     padding: 3,
     display: "flex",
     position: "absolute",
+    borderWidth: 1,
+    borderColor: theme.palette.grey[50],
+    borderStyle: "solid",
     borderRadius: "45%",
+    boxShadow: `2px 2px 1px ${theme.palette.grey[500]}`,
+    alignItems: "center",
     backgroundColor: theme.palette.common.white,
   },
   commentActionsContainer: {
@@ -69,6 +65,7 @@ const useCommentsStyles = makeStyles((theme) => ({
   },
   icon: {
     fontSize: "1rem",
+    marginRight: 4,
   },
 }));
 
@@ -92,9 +89,17 @@ function Comment({ comment }) {
         <Paper variant="outlined" className={classes.commentText}>
           {/* <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" /> */}
           <Typography variant="body2">{text}</Typography>
-          <div className={classes.commentLikes}>
-            <ThumbUpIcon className={classes.icon} /> 4
-          </div>
+          {likes ? (
+            <div className={classes.commentLikes}>
+              <ThumbUpIcon className={classes.icon} />
+              {likes}
+            </div>
+          ) : (
+            <div className={classes.commentLikes}>
+              <ThumbUpIcon className={classes.icon} />
+              {4}
+            </div>
+          )}
         </Paper>
         <div className={classes.commentActionsContainer}>
           <span className={classes.commentActionButton}>Like</span>
@@ -113,14 +118,14 @@ function Comment({ comment }) {
   );
 }
 
-function CommentsList({ comments }) {
+function CommentsList({ comments, showComments }) {
   const classes = useCommentsListStyles();
   return (
-    <div className={classes.commenetsList}>
+    <Collapse in={showComments} className={classes.commenetsList}>
       {comments.map((comment) => (
         <Comment key={comment._id} comment={comment} />
       ))}
-    </div>
+    </Collapse>
   );
 }
 

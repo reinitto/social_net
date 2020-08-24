@@ -121,6 +121,7 @@ module.exports = function (passport) {
         bio,
         cover_photo,
         profile_photo,
+        id,
       } = req.user;
       res.json({
         user: {
@@ -132,6 +133,7 @@ module.exports = function (passport) {
           bio,
           cover_photo,
           profile_photo,
+          id,
         },
       });
     }

@@ -6,7 +6,8 @@ var PostSchema = new Schema({
   creator: { type: Schema.Types.ObjectId, ref: "User", required: true },
   body: String,
   image: String,
-  likes: Number,
+  likedBy: [Schema.Types.ObjectId],
+  commentCount: { type: Number, default: 0 },
   comments: [commentSchema],
   created: { type: Date, default: Date.now },
 });

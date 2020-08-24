@@ -55,5 +55,51 @@ module.exports = function () {
       console.log(error);
     }
   });
+  router.post("/like", async (req, res) => {
+    try {
+      if (!req.body || !req.body.postId) {
+        res.status(422).json({ error: "Missing required parameters" });
+      }
+      const { postId } = req.body;
+
+      const { _id } = req.user;
+
+      try {
+        // find Post and push in comment
+        await Post.findByIdAndUpdate(postId, {
+          $addToSet: { likedBy: _id },
+        }).exec();
+        res.json({ status: "ok" });
+      } catch (err) {
+        console.log("post save error", err);
+        res.status(500).json({ error: "Oops! Something went wrong!" });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  router.post("/unlike", async (req, res) => {
+    try {
+      if (!req.body || !req.body.postId) {
+        res.status(422).json({ error: "Missing required parameters" });
+      }
+      const { postId } = req.body;
+
+      const { _id } = req.user;
+
+      try {
+        // find Post and push in comment
+        await Post.findByIdAndUpdate(postId, {
+          $pull: { likedBy: _id },
+        }).exec();
+        res.json({ status: "ok" });
+      } catch (err) {
+        console.log("post save error", err);
+        res.status(500).json({ error: "Oops! Something went wrong!" });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  });
   return router;
 };
