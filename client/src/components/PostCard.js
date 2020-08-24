@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
@@ -45,10 +45,28 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function PostCard(post) {
+export default function PostCard({ post }) {
   const classes = useStyles();
-  const { body, image } = post.post;
-  console.log("body, image ", body, image);
+  const { body, image } = post;
+  const [comment, setComment] = useState();
+  const addComment = async () => {
+    const url = "/api/post/comment";
+    const payload = {
+      content: {
+        text: comment,
+      },
+      postId: post._id,
+    };
+    const options = {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    };
+    const res = await fetch(url, options);
+    console.log("res", await res.json());
+  };
   return (
     <Card className={classes.root}>
       <CardContent>
@@ -78,15 +96,12 @@ export default function PostCard(post) {
           fullWidth
           label="Write a comment"
           multiline
-          // value={body}
-          // onChange={(e) => setBody(e.target.value)}
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
         />
 
-        <Button
-          variant="outlined"
-          //   onClick={submitPost}
-        >
-          Post
+        <Button variant="outlined" onClick={addComment}>
+          Comment
         </Button>
       </CardActions>
     </Card>

@@ -21,8 +21,8 @@ function Newsfeed() {
   console.log(posts);
   return (
     <div>
-      {posts.map(({ _id, ...post }) => (
-        <PostCard key={_id} post={post} />
+      {posts.map((post) => (
+        <PostCard key={post._id} post={post} />
       ))}
     </div>
   );

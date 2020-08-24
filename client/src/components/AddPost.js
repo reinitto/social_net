@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, Fragment } from "react";
 import ImageUpload from "./ImageUpload";
 import { Button, TextField, Typography } from "@material-ui/core";
 function AddPost() {
@@ -41,7 +41,7 @@ function AddPost() {
   };
 
   return (
-    <div>
+    <Fragment>
       <Typography variant="body2" alignCenter>
         {message}
       </Typography>
@@ -56,10 +56,12 @@ function AddPost() {
       <ImageUpload
         successCallback={onImageUpload.success}
         errorCallback={onImageUpload.error}
-        buttonText="Upload Image"
+        buttonText="Choose Picture"
       />
-      <Button onClick={submitPost}>Post</Button>
-    </div>
+      <Button variant="outlined" onClick={submitPost}>
+        Post
+      </Button>
+    </Fragment>
   );
 }
 
