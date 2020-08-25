@@ -4,7 +4,7 @@ var CommentSchema = new Schema({
   creator: { type: Schema.Types.ObjectId, ref: "User", required: true },
   text: String,
   image: String,
-  likes: { type: Number, default: 0 },
+  likedBy: [Schema.Types.ObjectId],
   replies: {
     type: [CommentSchema],
     default: [],

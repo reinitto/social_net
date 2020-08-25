@@ -1,18 +1,28 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Fragment } from "react";
 import { useUser } from "../context/user";
 import { makeStyles } from "@material-ui/core/styles";
-import Card from "@material-ui/core/Card";
-import CardActions from "@material-ui/core/CardActions";
-import CardContent from "@material-ui/core/CardContent";
-import CardMedia from "@material-ui/core/CardMedia";
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Divider from "@material-ui/core/Divider";
+import {
+  Card,
+  CardHeader,
+  Avatar,
+  IconButton,
+  MenuItem,
+  Menu,
+  CardActions,
+  CardContent,
+  CardMedia,
+  Button,
+  TextField,
+  Divider,
+  Typography,
+} from "@material-ui/core";
+import dayjs from "dayjs";
 import Comments from "./Comments";
+import PostCommentBox from "./PostCommentBox";
 import ThumbUpIcon from "@material-ui/icons/ThumbUp";
-
+// import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import MoreVertIcon from "@material-ui/icons/MoreVert";
 import ThumbUpAltOutlinedIcon from "@material-ui/icons/ThumbUpAltOutlined";
-import Typography from "@material-ui/core/Typography";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -72,16 +82,38 @@ const useStyles = makeStyles((theme) => ({
       textDecoration: "underline",
     },
   },
+  cardContent: {
+    paddingTop: 4,
+    paddingBottom: 4,
+    width: "100%",
+  },
+  subheaderDate: {
+    fontSize: 10,
+  },
 }));
 
 export default function PostCard({ post }) {
   const classes = useStyles();
   const { user } = useUser();
-  const { body, image, commentCount, likedBy } = post;
-  const [comment, setComment] = useState("");
+  const { body, image, commentCount, likedBy, creator } = post;
   const [like, setLike] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [showComments, setShowComments] = useState(false);
+  const [settingsVisible, setSettingsVisible] = useState(false);
+  const [authorInfo, setAuthorInfo] = useState({});
+  const anchorEl = useRef(null);
+
+  const handleClose = () => {
+    setSettingsVisible(false);
+  };
+
+  const getPostCreatorInfo = async (id) => {
+    const url = new URL(window.location.href + "api/user");
+    url.searchParams.append("userId", id);
+    const authorInfo = await fetch(url.href);
+    const info = await authorInfo.json();
+    setAuthorInfo(info.user);
+  };
 
   useEffect(() => {
     if (likedBy) {
@@ -92,35 +124,24 @@ export default function PostCard({ post }) {
     } else {
       setLikeCount(0);
     }
-  }, [user, likedBy]);
+    if (creator) {
+      getPostCreatorInfo(creator);
+    }
+  }, [user, likedBy, creator]);
 
   const commentInputRef = useRef(null);
   const toggleComments = () => {
     setShowComments(!showComments);
   };
   const focusCommentInput = () => {
-    commentInputRef.current.focus();
-  };
-
-  const addComment = async () => {
-    if (!comment) return;
-    const url = "/api/post/comment";
-    const payload = {
-      content: {
-        text: comment,
-      },
-      postId: post._id,
-    };
-    const options = {
-      method: "post",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    };
-    const res = await fetch(url, options);
-    setComment("");
-    console.log("res", await res.json());
+    if (showComments) {
+      commentInputRef.current.focus();
+    } else {
+      toggleComments();
+      setTimeout(() => {
+        commentInputRef.current.focus();
+      }, 500);
+    }
   };
 
   const toggleLike = () => {
@@ -154,10 +175,55 @@ export default function PostCard({ post }) {
     await fetch(url, options);
   };
 
-  console.log("user", user);
+  const deletePost = async () => {
+    const url = new URL(window.location.href + "api/post/submit");
+    url.searchParams.append("postId", post._id);
+    const options = {
+      method: "delete",
+    };
+    await fetch(url.href, options);
+  };
+
   return (
     <Card className={classes.root}>
-      <CardContent>
+      <CardHeader
+        style={{ width: "100%" }}
+        avatar={<Avatar aria-label="author" src={authorInfo.profile_photo} />}
+        action={
+          user.id === post.creator ? (
+            <div>
+              <IconButton
+                aria-label="settings"
+                aria-controls="post-menu"
+                aria-haspopup="true"
+                onClick={() => setSettingsVisible(true)}
+              >
+                <MoreVertIcon ref={anchorEl} />
+              </IconButton>
+              <Menu
+                id="post-menu"
+                anchorEl={anchorEl.current}
+                keepMounted
+                open={settingsVisible}
+                onClose={handleClose}
+              >
+                <MenuItem onClick={deletePost}>Delete Post</MenuItem>
+              </Menu>
+            </div>
+          ) : null
+        }
+        title={
+          authorInfo.first_name || authorInfo.last_name
+            ? `${authorInfo.first_name} ${authorInfo.last_name}`
+            : `${authorInfo.username}`
+        }
+        subheader={
+          <span className={classes.subheaderDate}>
+            {dayjs(post.created).format("DD-MM-YYYY HH:mm")}
+          </span>
+        }
+      />
+      <CardContent className={classes.cardContent}>
         <Typography variant="body2" color="textSecondary" component="p">
           {body}
         </Typography>
@@ -201,9 +267,14 @@ export default function PostCard({ post }) {
         </Button>
       </CardActions>
       <Divider variant="fullWidth" flexItem style={{ height: "1px" }} />
-      <Comments showComments={showComments} comments={post.comments} />
+      <Comments
+        showComments={showComments}
+        comments={post.comments}
+        postId={post._id}
+        commentInputRef={commentInputRef}
+      />
       <CardActions className={classes.actions}>
-        <TextField
+        {/* <TextField
           required
           inputRef={commentInputRef}
           variant="outlined"
@@ -216,7 +287,7 @@ export default function PostCard({ post }) {
 
         <Button variant="outlined" onClick={addComment}>
           Comment
-        </Button>
+        </Button> */}
       </CardActions>
     </Card>
   );

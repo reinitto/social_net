@@ -159,5 +159,16 @@ module.exports = function () {
     }
   });
 
+  router.get("/", async (req, res) => {
+    try {
+      const userId = req.query.userId;
+      const user = await User.findById(userId).exec();
+      res.json({ user });
+    } catch (error) {
+      console.log(error);
+      res.json({ error: `Can't get user` });
+    }
+  });
+
   return router;
 };

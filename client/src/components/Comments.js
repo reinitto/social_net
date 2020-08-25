@@ -1,11 +1,16 @@
-import React from "react";
+import React, { useState, Fragment } from "react";
 import dayjs from "dayjs";
-import { makeStyles } from "@material-ui/core/styles";
-import { Tooltip, Typography, Paper, Collapse } from "@material-ui/core";
+import {
+  Tooltip,
+  Typography,
+  Paper,
+  Collapse,
+  makeStyles,
+} from "@material-ui/core";
 import AccountCircleOutlinedIcon from "@material-ui/icons/AccountCircleOutlined";
 import ThumbUpIcon from "@material-ui/icons/ThumbUp";
-
 import ScheduleIcon from "@material-ui/icons/Schedule";
+import PostCommentBox from "./PostCommentBox";
 
 const useCommentsStyles = makeStyles((theme) => ({
   commentContainer: {
@@ -75,56 +80,95 @@ const useCommentsListStyles = makeStyles((theme) => ({
   },
 }));
 
-function Comment({ comment }) {
+function Comment({ comment, parentCommentId, postId }) {
   const classes = useCommentsStyles();
-  const { creator, text, image, likes, replies, created } = comment;
+  const [showReplies, setReplies] = useState(false);
+  const toggleReplies = () => {
+    setReplies(!showReplies);
+  };
+  const { creator, text, image, likedBy, replies, created } = comment;
   //   get creator avatar
+  // console.log("comment", comment);
   return (
-    <div className={classes.commentContainer}>
-      <AccountCircleOutlinedIcon
-        className={classes.commentAvatar}
-        fontSize="large"
-      />
-      <div className={classes.commentContent}>
-        <Paper variant="outlined" className={classes.commentText}>
-          {/* <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" /> */}
-          <Typography variant="body2">{text}</Typography>
-          {likes ? (
-            <div className={classes.commentLikes}>
-              <ThumbUpIcon className={classes.icon} />
-              {likes}
-            </div>
-          ) : (
-            <div className={classes.commentLikes}>
-              <ThumbUpIcon className={classes.icon} />
-              {4}
-            </div>
-          )}
-        </Paper>
-        <div className={classes.commentActionsContainer}>
-          <span className={classes.commentActionButton}>Like</span>
-          <span className={classes.dividerDots}> · </span>
-          <span className={classes.commentActionButton}>Reply</span>
-          <span className={classes.dividerDots}> · </span>
-          <Tooltip title={dayjs(created).format("DD-MM-YYYY HH:mm")}>
-            <ScheduleIcon
-              className={classes.icon}
-              aria-label="date comment posted"
-            />
-          </Tooltip>
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      <div className={classes.commentContainer}>
+        <AccountCircleOutlinedIcon
+          className={classes.commentAvatar}
+          fontSize="large"
+        />
+        <div className={classes.commentContent}>
+          <Paper variant="outlined" className={classes.commentText}>
+            {/* <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" /> */}
+            <Typography variant="body2">{text}</Typography>
+            {likedBy ? (
+              <div className={classes.commentLikes}>
+                <ThumbUpIcon className={classes.icon} />
+                {likedBy}
+              </div>
+            ) : (
+              <div className={classes.commentLikes}>
+                <ThumbUpIcon className={classes.icon} />
+                {4}
+              </div>
+            )}
+          </Paper>
+          <div className={classes.commentActionsContainer}>
+            <span className={classes.commentActionButton}>Like</span>
+            <span className={classes.dividerDots}> · </span>
+            <span
+              onClick={toggleReplies}
+              className={classes.commentActionButton}
+            >
+              Reply
+            </span>
+            <span className={classes.dividerDots}> · </span>
+            <Tooltip title={dayjs(created).format("DD-MM-YYYY HH:mm")}>
+              <ScheduleIcon
+                className={classes.icon}
+                aria-label="date comment posted"
+              />
+            </Tooltip>
+          </div>
         </div>
       </div>
+      {replies && replies.length > 0 ? (
+        <div onClick={toggleReplies}>{`${replies.length} Replies`}</div>
+      ) : null}
+      <CommentsList
+        comments={replies}
+        showComments={showReplies}
+        parentCommentId={
+          parentCommentId ? `${parentCommentId}.replies` : comment._id
+        }
+        postId={postId}
+      />
     </div>
   );
 }
 
-function CommentsList({ comments, showComments }) {
+function CommentsList({
+  comments = [],
+  showComments,
+  commentInputRef,
+  postId,
+  parentCommentId = "",
+}) {
   const classes = useCommentsListStyles();
   return (
     <Collapse in={showComments} className={classes.commenetsList}>
-      {comments.map((comment) => (
-        <Comment key={comment._id} comment={comment} />
+      {comments.map((comment, i) => (
+        <Comment
+          key={comment._id}
+          comment={comment}
+          parentCommentId={parentCommentId ? `${parentCommentId}.${i}` : `${i}`}
+          postId={postId}
+        />
       ))}
+      <PostCommentBox
+        postId={postId}
+        commentInputRef={commentInputRef}
+        commentPath={parentCommentId}
+      />
     </Collapse>
   );
 }
