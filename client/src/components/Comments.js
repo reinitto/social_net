@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from "react";
+import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import {
   Tooltip,
@@ -124,7 +124,7 @@ function Comment({ comment, parentCommentId, postId }) {
     username: "",
     _id: "",
   });
-  const { creator, text, image, likedBy = [], replies, created, _id } = comment;
+  const { creator, text, likedBy = [], replies, created, _id } = comment;
 
   const getCommenterInfo = async (id) => {
     const user = await getUserInfo(id);
@@ -141,7 +141,7 @@ function Comment({ comment, parentCommentId, postId }) {
     }
     setLikedCount(likedBy.length);
     getCommenterInfo(creator);
-  }, [_id]);
+  }, [_id, likedBy, user.id, creator]);
 
   const toggleReplies = () => {
     setReplies(!showReplies);
@@ -160,8 +160,8 @@ function Comment({ comment, parentCommentId, postId }) {
       },
       body: JSON.stringify(payload),
     };
-    const res = await fetch(url, options);
-    const data = await res.json();
+    await fetch(url, options);
+    // const data = await res.json();
   };
 
   const unlikeComment = async () => {
@@ -177,8 +177,8 @@ function Comment({ comment, parentCommentId, postId }) {
       },
       body: JSON.stringify(payload),
     };
-    const res = await fetch(url, options);
-    const data = await res.json();
+    await fetch(url, options);
+    // const data = await res.json();
   };
 
   const toggleLikeComment = async () => {
@@ -217,11 +217,11 @@ function Comment({ comment, parentCommentId, postId }) {
               to={`/profile/${commenter._id}`}
               className={classes.commentAuthor}
             >
-              <Typography variant="span" align="left">
+              <span style={{ textAlign: "left" }}>
                 {user.first_name || user.last_name
                   ? `${user.first_name} ${user.last_name} `
                   : `${user.username}`}
-              </Typography>
+              </span>
             </Link>
             <Typography variant="body2">{text}</Typography>
             {likedCount > 0 ? (
@@ -291,7 +291,7 @@ function CommentsList({
     <Collapse in={showComments} className={classes.commenetsList}>
       {comments.map((comment, i) => (
         <Comment
-          key={comment._id}
+          key={comment._id + i}
           comment={comment}
           parentCommentId={parentCommentId ? `${parentCommentId}.${i}` : `${i}`}
           postId={postId}

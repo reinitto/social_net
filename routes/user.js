@@ -5,6 +5,8 @@ module.exports = function () {
   const express = require("express");
   const router = express.Router();
 
+  const sortPosts = (a, b) => b.created - a.created;
+
   router.post("/edit", (req, res) => {
     const { data, updates_for } = req.body;
     const { email } = req.user;
@@ -132,33 +134,47 @@ module.exports = function () {
   });
 
   router.get("/feed/:userId", async (req, res) => {
-    const userId = req.params.userId;
-    let follows = await Follow.find({ user: userId }).exec();
-
-    let followings = follows.map((follow) => follow.target);
-
-    let feeds = await Post.find({ user: followings }).exec();
-    res.json({ newsFeed: feeds });
-  });
-
-  router.get("/newsfeed", async (req, res) => {
     try {
-      const userId = req.user.id;
-      const followings = await Follow.find({ user: userId }).exec();
-      let newsFeed = [];
+      const userId = req.params.userId;
+      let follows = await Follow.find({ user: userId }).exec();
+      let followings = follows.map((follow) => `${follow.target}`);
+      // add requested user posts
+      followings.push(userId);
+      followings = new Set(followings);
+
+      let feeds = [];
       for (let following of followings) {
-        let posts = await Post.find({ creator: following.target })
+        let posts = await Post.find({ creator: following })
           .sort({ created: -1 })
           .limit(100)
           .exec();
-        newsFeed = [...newsFeed, ...posts];
+        feeds = [...feeds, ...posts];
       }
-      res.json({ newsFeed });
+      feeds = feeds.sort(sortPosts);
+      res.json({ feed: feeds });
     } catch (error) {
-      console.log(error);
-      res.json({ error: `Can't get newsfeed` });
+      res.json({ error });
     }
   });
+
+  // router.get("/newsfeed", async (req, res) => {
+  //   try {
+  //     const userId = req.user.id;
+  //     const followings = await Follow.find({ user: userId }).exec();
+  //     let newsFeed = [];
+  //     for (let following of followings) {
+  //       let posts = await Post.find({ creator: following.target })
+  //         .sort({ created: -1 })
+  //         .limit(100)
+  //         .exec();
+  //       newsFeed = [...newsFeed, ...posts];
+  //     }
+  //     res.json({ newsFeed });
+  //   } catch (error) {
+  //     console.log(error);
+  //     res.json({ error: `Can't get newsfeed` });
+  //   }
+  // });
 
   router.get("/:userId", async (req, res) => {
     try {

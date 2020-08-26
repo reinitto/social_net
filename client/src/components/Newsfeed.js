@@ -1,31 +1,39 @@
 import React, { useEffect, useState } from "react";
 import PostCard from "./PostCard";
-function Newsfeed() {
+import { makeStyles } from "@material-ui/core";
+import { getUserFeed } from "./utils/getUserFeed";
+
+const useNewsfeedStyles = makeStyles((theme) => ({
+  newsFeedContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    width: "100%",
+  },
+}));
+function Newsfeed({ userId }) {
   const [posts, setPosts] = useState([]);
+  const classes = useNewsfeedStyles();
   useEffect(() => {
     const getPosts = async () => {
-      const url = "/api/user/newsfeed";
-      const res = await fetch(url);
-      const posts = await res.json();
-      if (posts && posts.newsFeed) {
-        setPosts(posts.newsFeed);
-      }
+      const feed = await getUserFeed(userId);
+      setPosts(feed);
     };
     getPosts();
-  }, []);
-  if (posts.length === 0) {
+  }, [userId]);
+  if (!posts || posts.length === 0) {
     return (
       <div>Your newsFeed is empty. Follow more people to get latest news!</div>
     );
+  } else {
+    return (
+      <div className={classes.newsFeedContainer}>
+        {posts.map((post) => (
+          <PostCard key={post._id} post={post} />
+        ))}
+      </div>
+    );
   }
-  console.log(posts);
-  return (
-    <div>
-      {posts.map((post) => (
-        <PostCard key={post._id} post={post} />
-      ))}
-    </div>
-  );
 }
 
 export default Newsfeed;

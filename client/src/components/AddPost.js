@@ -42,7 +42,7 @@ function AddPost() {
 
   return (
     <Fragment>
-      <Typography variant="body2" alignCenter>
+      <Typography variant="body2" align="center">
         {message}
       </Typography>
       <TextField

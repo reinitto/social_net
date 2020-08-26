@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Switch, Redirect } from "react-router-dom";
-import { Home, Login, Register, Account } from "./pages";
+import { Home, Login, Register, Account, Profile } from "./pages";
 import { CssBaseline } from "@material-ui/core";
 import PageLayout from "./components/Layout/PageLayout";
 import ProtectedRoute from "./components/Routes/ProtectedRoute";
@@ -16,6 +16,9 @@ function App() {
           </ProtectedRoute>
           <ProtectedRoute exact path="/account">
             <Account />
+          </ProtectedRoute>
+          <ProtectedRoute exact path="/profile/:profileId">
+            <Profile />
           </ProtectedRoute>
           <LoggedOutRoute path="/login">
             <Login />

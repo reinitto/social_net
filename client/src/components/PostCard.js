@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, Fragment } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useUser } from "../context/user";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    maxWidth: 345,
+    maxWidth: 500,
     padding: theme.spacing(1),
     margin: theme.spacing(1),
   },
@@ -190,7 +190,7 @@ export default function PostCard({ post }) {
         style={{ width: "100%" }}
         avatar={<Avatar aria-label="author" src={authorInfo.profile_photo} />}
         action={
-          user.id === post.creator ? (
+          user && user.id === post.creator ? (
             <div>
               <IconButton
                 aria-label="settings"

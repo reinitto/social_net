@@ -23,7 +23,7 @@ export const BackgroundPicture = ({
   }));
   const classes = useStyles();
   return (
-    <div className={`${classes.backgroundImage} ${className}`}>{children}</div>
+    <div className={`${className} ${classes.backgroundImage} `}>{children}</div>
   );
 };
 
