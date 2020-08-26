@@ -159,9 +159,9 @@ module.exports = function () {
     }
   });
 
-  router.get("/", async (req, res) => {
+  router.get("/:userId", async (req, res) => {
     try {
-      const userId = req.query.userId;
+      const userId = req.params.userId;
       const user = await User.findById(userId).exec();
       res.json({ user });
     } catch (error) {

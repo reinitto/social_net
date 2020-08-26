@@ -12,13 +12,12 @@ import {
   CardContent,
   CardMedia,
   Button,
-  TextField,
   Divider,
   Typography,
 } from "@material-ui/core";
 import dayjs from "dayjs";
+import { getUserInfo } from "./utils/getUserInfo";
 import Comments from "./Comments";
-import PostCommentBox from "./PostCommentBox";
 import ThumbUpIcon from "@material-ui/icons/ThumbUp";
 // import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
@@ -108,11 +107,12 @@ export default function PostCard({ post }) {
   };
 
   const getPostCreatorInfo = async (id) => {
-    const url = new URL(window.location.href + "api/user");
-    url.searchParams.append("userId", id);
-    const authorInfo = await fetch(url.href);
-    const info = await authorInfo.json();
-    setAuthorInfo(info.user);
+    const user = await getUserInfo(id);
+    user.profile_photo = user.profile_photo.replace(
+      "upload",
+      "upload/w_1000,h_1000,c_crop,g_face/w_100"
+    );
+    setAuthorInfo(user);
   };
 
   useEffect(() => {
@@ -273,22 +273,6 @@ export default function PostCard({ post }) {
         postId={post._id}
         commentInputRef={commentInputRef}
       />
-      <CardActions className={classes.actions}>
-        {/* <TextField
-          required
-          inputRef={commentInputRef}
-          variant="outlined"
-          fullWidth
-          label="Write a comment"
-          multiline
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-        />
-
-        <Button variant="outlined" onClick={addComment}>
-          Comment
-        </Button> */}
-      </CardActions>
     </Card>
   );
 }

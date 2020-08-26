@@ -5,7 +5,7 @@ export default function UserProvider({ children }) {
   const [user, setUser] = useState(undefined);
   useEffect(() => {
     const getUser = async () => {
-      const url = "/api/auth/user";
+      const url = "/api/auth/me";
       const res = await fetch(url);
       const { user } = await res.json();
       setUser(user);

@@ -108,7 +108,7 @@ module.exports = function (passport) {
     });
   });
 
-  router.get("/user", function (req, res) {
+  router.get("/me", function (req, res) {
     if (!req.user) {
       res.json({ user: null, error: "User not found" });
     } else {

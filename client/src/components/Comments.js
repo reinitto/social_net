@@ -1,4 +1,4 @@
-import React, { useState, Fragment } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import dayjs from "dayjs";
 import {
   Tooltip,
@@ -6,21 +6,38 @@ import {
   Paper,
   Collapse,
   makeStyles,
+  Avatar,
 } from "@material-ui/core";
-import AccountCircleOutlinedIcon from "@material-ui/icons/AccountCircleOutlined";
 import ThumbUpIcon from "@material-ui/icons/ThumbUp";
 import ScheduleIcon from "@material-ui/icons/Schedule";
+import SubdirectoryArrowRightIcon from "@material-ui/icons/SubdirectoryArrowRight";
+import { getUserInfo } from "./utils/getUserInfo";
 import PostCommentBox from "./PostCommentBox";
+import { Link } from "react-router-dom";
+
+import { useUser } from "../context/user";
 
 const useCommentsStyles = makeStyles((theme) => ({
+  comment: {
+    display: "flex",
+    flexDirection: "column",
+    marginBottom: theme.spacing(1),
+    marginTop: theme.spacing(1),
+    marginLeft: theme.spacing(1),
+  },
   commentContainer: {
     display: "flex",
     width: "100%",
-    margin: theme.spacing(1),
   },
-  commentAvatar: {
-    marginLeft: 4,
-    marginRight: 4,
+  commentAuthor: {
+    fontWeight: 600,
+    fontSize: 12,
+    textDecoration: "none",
+    color: "inherit",
+    height: "fit-content",
+    "&:hover": {
+      textDecoration: "underline",
+    },
   },
   commentContent: {
     display: "flex",
@@ -72,48 +89,155 @@ const useCommentsStyles = makeStyles((theme) => ({
     fontSize: "1rem",
     marginRight: 4,
   },
+  repliesCount: {
+    maxHeight: 25,
+    display: "flex",
+    alignItems: "center",
+    paddingLeft: "15%",
+    overflow: "hidden",
+    transition: "max-height 0.3s",
+    "& > svg": {
+      marginLeft: 4,
+      marginRight: 4,
+      width: "7%",
+    },
+  },
 }));
 
 const useCommentsListStyles = makeStyles((theme) => ({
   commenetsList: {
     width: "100%",
+    paddingLeft: theme.spacing(2),
   },
 }));
 
 function Comment({ comment, parentCommentId, postId }) {
   const classes = useCommentsStyles();
   const [showReplies, setReplies] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [likedCount, setLikedCount] = useState(0);
+  const { user } = useUser();
+  const [commenter, setCommenter] = useState({
+    profile_photo: "",
+    first_name: "",
+    last_name: "",
+    username: "",
+    _id: "",
+  });
+  const { creator, text, image, likedBy = [], replies, created, _id } = comment;
+
+  const getCommenterInfo = async (id) => {
+    const user = await getUserInfo(id);
+    user.profile_photo = `${user.profile_photo}`.replace(
+      "upload",
+      "upload/w_1000,h_1000,c_crop,g_face/w_100"
+    );
+    setCommenter(user);
+  };
+
+  useEffect(() => {
+    if (likedBy.length > 0 && likedBy.includes(user.id)) {
+      setLiked(true);
+    }
+    setLikedCount(likedBy.length);
+    getCommenterInfo(creator);
+  }, [_id]);
+
   const toggleReplies = () => {
     setReplies(!showReplies);
   };
-  const { creator, text, image, likedBy, replies, created } = comment;
-  //   get creator avatar
-  // console.log("comment", comment);
+
+  const likeComment = async () => {
+    const url = "/api/post/comment/like";
+    const payload = {
+      postId,
+      commentPath: parentCommentId,
+    };
+    const options = {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    };
+    const res = await fetch(url, options);
+    const data = await res.json();
+  };
+
+  const unlikeComment = async () => {
+    const url = "/api/post/comment/unlike";
+    const payload = {
+      postId,
+      commentPath: parentCommentId,
+    };
+    const options = {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    };
+    const res = await fetch(url, options);
+    const data = await res.json();
+  };
+
+  const toggleLikeComment = async () => {
+    if (liked) {
+      unlikeComment();
+      setLikedCount(likedCount - 1);
+      setLiked(false);
+    } else {
+      likeComment();
+      setLikedCount(likedCount + 1);
+      setLiked(true);
+    }
+  };
+
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div className={classes.comment}>
       <div className={classes.commentContainer}>
-        <AccountCircleOutlinedIcon
-          className={classes.commentAvatar}
-          fontSize="large"
-        />
+        <Link
+          to={`/profile/${commenter._id}`}
+          className={classes.commentAuthor}
+        >
+          <Avatar
+            src={commenter.profile_photo}
+            className={
+              parentCommentId.length > 5
+                ? classes.replyAvatar
+                : classes.commentAvatar
+            }
+            variant="circle"
+          />
+        </Link>
+
         <div className={classes.commentContent}>
           <Paper variant="outlined" className={classes.commentText}>
-            {/* <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" /> */}
+            <Link
+              to={`/profile/${commenter._id}`}
+              className={classes.commentAuthor}
+            >
+              <Typography variant="span" align="left">
+                {user.first_name || user.last_name
+                  ? `${user.first_name} ${user.last_name} `
+                  : `${user.username}`}
+              </Typography>
+            </Link>
             <Typography variant="body2">{text}</Typography>
-            {likedBy ? (
+            {likedCount > 0 ? (
               <div className={classes.commentLikes}>
                 <ThumbUpIcon className={classes.icon} />
-                {likedBy}
+                {likedCount}
               </div>
-            ) : (
-              <div className={classes.commentLikes}>
-                <ThumbUpIcon className={classes.icon} />
-                {4}
-              </div>
-            )}
+            ) : null}
           </Paper>
           <div className={classes.commentActionsContainer}>
-            <span className={classes.commentActionButton}>Like</span>
+            <span
+              className={classes.commentActionButton}
+              onClick={toggleLikeComment}
+            >
+              Like
+            </span>
             <span className={classes.dividerDots}> · </span>
             <span
               onClick={toggleReplies}
@@ -132,7 +256,16 @@ function Comment({ comment, parentCommentId, postId }) {
         </div>
       </div>
       {replies && replies.length > 0 ? (
-        <div onClick={toggleReplies}>{`${replies.length} Replies`}</div>
+        <div
+          className={classes.repliesCount}
+          onClick={toggleReplies}
+          style={{
+            maxHeight: !showReplies ? "25px" : "0px",
+          }}
+        >
+          <SubdirectoryArrowRightIcon />
+          {`${replies.length} Replies`}
+        </div>
       ) : null}
       <CommentsList
         comments={replies}

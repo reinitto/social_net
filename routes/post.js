@@ -1,6 +1,5 @@
 module.exports = function () {
   const Post = require("../models/Post");
-  const Comment = require("../models/Comment");
   const express = require("express");
   const router = express.Router();
 
@@ -47,17 +46,10 @@ module.exports = function () {
   router.post("/comment", async (req, res) => {
     try {
       if (!req.body || !req.body.postId || !req.body.content) {
-        console.log("req body", req.body);
         res.status(422).json({ error: "Missing required parameters" });
       } else {
         const { postId, content } = req.body;
         let { commentPath } = req.body;
-
-        // let coms = commentPath ? commentPath.split(".") : [];
-        // if (coms.length > 0 && !coms[0]) {
-        //   coms = coms.slice(1);
-        // }
-        // console.log("comment path", coms);
         const { _id } = req.user;
         const newComment = {
           text: content.text,
@@ -91,6 +83,56 @@ module.exports = function () {
       console.log(error);
     }
   });
+
+  //Like COmment
+  router.post("/comment/like", async (req, res) => {
+    try {
+      if (!req.body || !req.body.postId) {
+        res.status(422).json({ error: "Missing required parameters" });
+      } else {
+        try {
+          const { postId, commentPath } = req.body;
+          const { _id } = req.user;
+          const update = {};
+          update["comments." + commentPath + ".likedBy"] = _id;
+          await Post.findByIdAndUpdate(postId, {
+            $addToSet: update,
+          }).exec();
+          res.json({ status: "ok" });
+        } catch (err) {
+          console.log("post save error", err);
+          res.json({ error: "Oops! Something went wrong!" });
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  //Unlike Comment
+  router.post("/comment/unlike", async (req, res) => {
+    try {
+      if (!req.body || !req.body.postId) {
+        res.status(422).json({ error: "Missing required parameters" });
+      } else {
+        try {
+          const { postId, commentPath } = req.body;
+          const { _id } = req.user;
+          const update = {};
+          update["comments." + commentPath + ".likedBy"] = _id;
+          await Post.findByIdAndUpdate(postId, {
+            $pull: update,
+          }).exec();
+          res.json({ status: "ok" });
+        } catch (err) {
+          console.log("post save error", err);
+          res.json({ error: "Oops! Something went wrong!" });
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
   // Like Post
   router.post("/like", async (req, res) => {
     try {
