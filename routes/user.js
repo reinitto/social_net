@@ -131,14 +131,15 @@ module.exports = function () {
     }
   });
 
-  // router.get("/feed", async (req, res) => {
-  //   let follows = await Follow.find({ user: req.user.id }).exec();
+  router.get("/feed/:userId", async (req, res) => {
+    const userId = req.params.userId;
+    let follows = await Follow.find({ user: userId }).exec();
 
-  //   let followings = follows.map((follow) => follow.target);
+    let followings = follows.map((follow) => follow.target);
 
-  //   let feeds = await Post.find({ user: followings }).exec();
-  //   res.json({ newsFeed: feeds });
-  // });
+    let feeds = await Post.find({ user: followings }).exec();
+    res.json({ newsFeed: feeds });
+  });
 
   router.get("/newsfeed", async (req, res) => {
     try {
