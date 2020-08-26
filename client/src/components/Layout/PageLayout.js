@@ -5,7 +5,7 @@ function PageLayout({ children }) {
   return (
     <Fragment>
       <Navbar />
-      {children}
+      <div style={{ maxWidth: "1024px", margin: "auto" }}>{children}</div>
       <Footer />
     </Fragment>
   );
