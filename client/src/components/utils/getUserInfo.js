@@ -1,6 +1,6 @@
 export const getUserInfo = async (id) => {
   try {
-    const url = new URL(window.location.href + `api/user/${id}`);
+    const url = new URL(window.location.origin + `/api/user/${id}`);
     const authorInfo = await fetch(url.href);
     const { user } = await authorInfo.json();
     return user;
