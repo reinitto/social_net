@@ -26,3 +26,5 @@ export const BackgroundPicture = ({
     <div className={`${classes.backgroundImage} ${className}`}>{children}</div>
   );
 };
+
+export default BackgroundPicture;
