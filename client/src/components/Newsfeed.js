@@ -19,21 +19,18 @@ function Newsfeed({ userId }) {
       const feed = await getUserFeed(userId);
       setPosts(feed);
     };
-    getPosts();
+    if (userId) {
+      getPosts();
+    }
   }, [userId]);
-  if (!posts || posts.length === 0) {
-    return (
-      <div>Your newsFeed is empty. Follow more people to get latest news!</div>
-    );
-  } else {
-    return (
-      <div className={classes.newsFeedContainer}>
-        {posts.map((post) => (
-          <PostCard key={post._id} post={post} />
-        ))}
-      </div>
-    );
-  }
+
+  return (
+    <div className={classes.newsFeedContainer}>
+      {posts.map((post) => (
+        <PostCard key={post._id} post={post} />
+      ))}
+    </div>
+  );
 }
 
 export default Newsfeed;
