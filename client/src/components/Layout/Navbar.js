@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import AccountCircle from "@material-ui/icons/AccountCircle";
 import MenuIcon from "@material-ui/icons/Menu";
 import { appName } from "../../constants";
@@ -35,16 +35,16 @@ const useStyles = makeStyles((theme) => {
 
 function Navbar() {
   const classes = useStyles();
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
   const { user, setUser } = useUser();
+  let anchorEl = useRef(null);
+  const [open, setOpen] = useState(false);
 
-  const handleMenu = (event) => {
-    setAnchorEl(event.currentTarget);
+  const handleMenu = () => {
+    setOpen(true);
   };
 
   const handleClose = () => {
-    setAnchorEl(null);
+    setOpen(false);
   };
 
   const logout = async () => {
@@ -77,21 +77,13 @@ function Navbar() {
                 aria-haspopup="true"
                 onClick={handleMenu}
                 color="inherit"
+                ref={anchorEl}
               >
                 <AccountCircle />
               </IconButton>
               <Menu
                 id="menu-appbar"
-                anchorEl={anchorEl}
-                anchorOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
+                anchorEl={anchorEl.current}
                 open={open}
                 onClose={handleClose}
               >
@@ -100,7 +92,11 @@ function Navbar() {
                     My account
                   </Link>
                 </MenuItem>
-                <MenuItem onClick={handleClose}>Profile</MenuItem>
+                <MenuItem onClick={handleClose}>
+                  <Link className={classes.link} to={`/profile/${user.id}`}>
+                    Profile
+                  </Link>
+                </MenuItem>
                 <MenuItem onClick={logout}>Logout</MenuItem>
               </Menu>
             </div>
