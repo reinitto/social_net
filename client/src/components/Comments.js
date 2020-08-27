@@ -8,6 +8,7 @@ import {
   makeStyles,
   Avatar,
 } from "@material-ui/core";
+import { Skeleton } from "@material-ui/lab";
 import ThumbUpIcon from "@material-ui/icons/ThumbUp";
 import ScheduleIcon from "@material-ui/icons/Schedule";
 import SubdirectoryArrowRightIcon from "@material-ui/icons/SubdirectoryArrowRight";
@@ -206,35 +207,47 @@ function Comment({ comment, parentCommentId, postId }) {
       setLiked(true);
     }
   };
-
+  const { _id, profile_photo } = commenter;
+  const { first_name, last_name, username } = user;
   return (
     <div className={classes.comment}>
       <div className={classes.commentContainer}>
-        <Link
-          to={`/profile/${commenter._id}`}
-          className={classes.commentAuthor}
-        >
-          <Avatar
-            src={commenter.profile_photo}
-            className={
-              parentCommentId.length > 5
-                ? classes.replyAvatar
-                : classes.commentAvatar
-            }
-            variant="circle"
-          />
+        <Link to={`/profile/${_id}`} className={classes.commentAuthor}>
+          {profile_photo ? (
+            <Avatar
+              src={profile_photo}
+              className={
+                parentCommentId.length > 5
+                  ? classes.replyAvatar
+                  : classes.commentAvatar
+              }
+              variant="circle"
+            />
+          ) : (
+            <Skeleton
+              variant="circle"
+              className={
+                parentCommentId.length > 5
+                  ? classes.replyAvatar
+                  : classes.commentAvatar
+              }
+            />
+          )}
         </Link>
 
         <div className={classes.commentContent}>
           <Paper variant="outlined" className={classes.commentText}>
-            <Link
-              to={`/profile/${commenter._id}`}
-              className={classes.commentAuthor}
-            >
+            <Link to={`/profile/${_id}`} className={classes.commentAuthor}>
               <span style={{ textAlign: "left" }}>
-                {user.first_name || user.last_name
-                  ? `${user.first_name} ${user.last_name} `
-                  : `${user.username}`}
+                {first_name || last_name || username ? (
+                  first_name || last_name ? (
+                    `${first_name} ${last_name} `
+                  ) : (
+                    `${username}`
+                  )
+                ) : (
+                  <Skeleton variant="text" />
+                )}
               </span>
             </Link>
             <Typography variant="body2">{text}</Typography>

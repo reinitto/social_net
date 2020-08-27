@@ -21,7 +21,6 @@ function Profile() {
     }
     return () => (isRendered = false);
   }, [profileId]);
-  console.log("profile", profile);
   const {
     cover_photo,
     first_name,

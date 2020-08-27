@@ -17,6 +17,7 @@ export const ProfilePicture = ({ src, className = "", style = {} }) => {
         className={`${classes.profileImage} ${className}`}
         src={src}
         alt="profile"
+        loading="lazy"
       />
     </div>
   );

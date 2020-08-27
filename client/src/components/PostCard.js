@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Fragment } from "react";
 import { useUser } from "../context/user";
-import { makeStyles } from "@material-ui/core/styles";
 import {
   Card,
   CardHeader,
@@ -14,7 +13,9 @@ import {
   Button,
   Divider,
   Typography,
+  makeStyles,
 } from "@material-ui/core";
+import { Skeleton } from "@material-ui/lab";
 import dayjs from "dayjs";
 import { getUserInfo } from "./utils/getUserInfo";
 import Comments from "./Comments";
@@ -186,12 +187,18 @@ export default function PostCard({ post }) {
     };
     await fetch(url.href, options);
   };
-
+  const { profile_photo, first_name, last_name, username } = authorInfo;
   return (
     <Card className={classes.root}>
       <CardHeader
         style={{ width: "100%" }}
-        avatar={<Avatar aria-label="author" src={authorInfo.profile_photo} />}
+        avatar={
+          profile_photo ? (
+            <Avatar aria-label="author" src={profile_photo} />
+          ) : (
+            <Skeleton variant="circle" width={40} height={40} />
+          )
+        }
         action={
           user && user.id === post.creator ? (
             <div>
@@ -216,9 +223,17 @@ export default function PostCard({ post }) {
           ) : null
         }
         title={
-          authorInfo.first_name || authorInfo.last_name
-            ? `${authorInfo.first_name} ${authorInfo.last_name}`
-            : `${authorInfo.username}`
+          first_name || last_name || username ? (
+            <Typography>
+              {first_name || last_name
+                ? `${first_name} ${last_name}`
+                : `${username}`}
+            </Typography>
+          ) : (
+            <Fragment>
+              <Skeleton variant="text" style={{ height: "24px" }} />
+            </Fragment>
+          )
         }
         subheader={
           <span className={classes.subheaderDate}>
@@ -232,7 +247,12 @@ export default function PostCard({ post }) {
         </Typography>
       </CardContent>
       {image ? (
-        <CardMedia component="img" className={classes.media} src={image} />
+        <CardMedia
+          component="img"
+          className={classes.media}
+          src={image}
+          loading="lazy"
+        />
       ) : null}
       <Divider variant="fullWidth" flexItem style={{ height: "1px" }} />
       <div className={classes.postStats}>

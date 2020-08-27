@@ -8,30 +8,10 @@ import {
   Typography,
   makeStyles,
 } from "@material-ui/core";
+import { Skeleton } from "@material-ui/lab";
+
 import { ProfilePicture } from "./ProfilePicture";
 import { BackgroundPicture } from "./BackgroundPicture";
-
-//   styles: {
-//     palette: {
-//       window: "#FFF",
-//       windowBorder: "#90A0B3",
-//       tabIcon: "#0E2F5A",
-//       menuIcons: "#5A616A",
-//       textDark: "#000000",
-//       textLight: "#FFFFFF",
-//       link: "#0078FF",
-//       action: "#FF620C",
-//       inactiveTabIcon: "#0E2F5A",
-//       error: "#F44235",
-//       inProgress: "#0078FF",
-//       complete: "#20B832",
-//       sourceBg: "#E4EBF1",
-//     },
-//     fonts: {
-//       "'Cute Font', cursive":
-//         "https://fonts.googleapis.com/css?family=Cute+Font",
-//     },
-//   },
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -237,7 +217,11 @@ function EditProfile() {
               />
             </div>
             <div className={classes.avatarContainer}>
-              <ProfilePicture src={profileImage} />
+              {profileImage ? (
+                <ProfilePicture src={profileImage} />
+              ) : (
+                <Skeleton variant="circle" />
+              )}
             </div>
           </Grid>
           <Grid item xs={12} className={classes.gridItem}>
@@ -328,6 +312,7 @@ function EditProfile() {
             </Typography>
             {Object.keys(social_accounts).map((soc_prof) => (
               <TextField
+                key={soc_prof}
                 label={soc_prof}
                 variant="outlined"
                 value={social_accounts[soc_prof]}
