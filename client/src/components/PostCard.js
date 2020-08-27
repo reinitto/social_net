@@ -94,7 +94,7 @@ const useStyles = makeStyles((theme) => ({
 export default function PostCard({ post }) {
   const classes = useStyles();
   const { user } = useUser();
-  const { body, image, commentCount, likedBy, creator } = post;
+  const { body, image, commentCount, likedBy, creator, comments } = post;
   const [like, setLike] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [showComments, setShowComments] = useState(false);
@@ -237,9 +237,11 @@ export default function PostCard({ post }) {
           <ThumbUpIcon className={classes.iconBlue} />
           {likeCount}
         </span>
-        <span className={classes.toggleComments} onClick={toggleComments}>{`${
-          commentCount || 5
-        } Comments`}</span>
+        <span className={classes.toggleComments} onClick={toggleComments}>
+          {comments && comments.length > 0
+            ? `${comments.length} Comments`
+            : null}
+        </span>
       </div>
       <Divider variant="fullWidth" flexItem style={{ height: "1px" }} />
       <CardActions className={classes.actions}>
