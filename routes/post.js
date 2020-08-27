@@ -7,20 +7,21 @@ module.exports = function () {
     try {
       if (!req.body || !req.body.body) {
         res.status(422).json({ error: "Missing required parameters" });
-      }
-      const { body, image } = req.body;
-      const { _id } = req.user;
-      const newPost = new Post({
-        body,
-        image,
-        creator: _id,
-      });
-      try {
-        await newPost.save();
-        res.json({ status: "ok" });
-      } catch (err) {
-        console.log("post save error", err);
-        res.status(500).json({ error: "Oops! Something went wrong!" });
+      } else {
+        const { body, image } = req.body;
+        const { _id } = req.user;
+        const newPost = new Post({
+          body,
+          image,
+          creator: _id,
+        });
+        try {
+          await newPost.save();
+          res.json({ status: "ok" });
+        } catch (err) {
+          console.log("post save error", err);
+          res.status(500).json({ error: "Oops! Something went wrong!" });
+        }
       }
     } catch (error) {
       console.log(error);
@@ -45,6 +46,7 @@ module.exports = function () {
   // postId, comment contents
   router.post("/comment", async (req, res) => {
     try {
+      console.log("req.body", req.body);
       if (!req.body || !req.body.postId || !req.body.content) {
         res.status(422).json({ error: "Missing required parameters" });
       } else {
@@ -138,20 +140,21 @@ module.exports = function () {
     try {
       if (!req.body || !req.body.postId) {
         res.status(422).json({ error: "Missing required parameters" });
-      }
-      const { postId } = req.body;
+      } else {
+        const { postId } = req.body;
 
-      const { _id } = req.user;
+        const { _id } = req.user;
 
-      try {
-        // find Post and push in comment
-        await Post.findByIdAndUpdate(postId, {
-          $addToSet: { likedBy: _id },
-        }).exec();
-        res.json({ status: "ok" });
-      } catch (err) {
-        console.log("post save error", err);
-        res.status(500).json({ error: "Oops! Something went wrong!" });
+        try {
+          // find Post and push in comment
+          await Post.findByIdAndUpdate(postId, {
+            $addToSet: { likedBy: _id },
+          }).exec();
+          res.json({ status: "ok" });
+        } catch (err) {
+          console.log("post save error", err);
+          res.status(500).json({ error: "Oops! Something went wrong!" });
+        }
       }
     } catch (error) {
       console.log(error);
@@ -162,20 +165,21 @@ module.exports = function () {
     try {
       if (!req.body || !req.body.postId) {
         res.status(422).json({ error: "Missing required parameters" });
-      }
-      const { postId } = req.body;
+      } else {
+        const { postId } = req.body;
 
-      const { _id } = req.user;
+        const { _id } = req.user;
 
-      try {
-        // find Post and push in comment
-        await Post.findByIdAndUpdate(postId, {
-          $pull: { likedBy: _id },
-        }).exec();
-        res.json({ status: "ok" });
-      } catch (err) {
-        console.log("post save error", err);
-        res.status(500).json({ error: "Oops! Something went wrong!" });
+        try {
+          // find Post and push in comment
+          await Post.findByIdAndUpdate(postId, {
+            $pull: { likedBy: _id },
+          }).exec();
+          res.json({ status: "ok" });
+        } catch (err) {
+          console.log("post save error", err);
+          res.status(500).json({ error: "Oops! Something went wrong!" });
+        }
       }
     } catch (error) {
       console.log(error);

@@ -18,9 +18,6 @@ import { useUser } from "../../context/user";
 const useStyles = makeStyles((theme) => {
   console.log("theme", theme);
   return {
-    root: {
-      flexGrow: 1,
-    },
     menuButton: {
       marginRight: theme.spacing(2),
     },

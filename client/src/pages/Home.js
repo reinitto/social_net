@@ -6,7 +6,6 @@ function Home() {
   const { user } = useUser();
   return (
     <div>
-      Im Home
       <AddPost />
       <Newsfeed userId={user && user.id} />
     </div>

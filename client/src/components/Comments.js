@@ -12,7 +12,7 @@ import ThumbUpIcon from "@material-ui/icons/ThumbUp";
 import ScheduleIcon from "@material-ui/icons/Schedule";
 import SubdirectoryArrowRightIcon from "@material-ui/icons/SubdirectoryArrowRight";
 import { getUserInfo } from "./utils/getUserInfo";
-import PostCommentBox from "./PostCommentBox";
+import { PostCommentBox } from "./PostCommentBox";
 import { Link } from "react-router-dom";
 
 import { useUser } from "../context/user";

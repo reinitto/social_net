@@ -9,6 +9,9 @@ function ImageUpload({
     color: "primary",
     size: "small",
   },
+  style = {
+    marginBottom: "10px",
+  },
 }) {
   let openWidget = () => {
     let widget = window.cloudinary.createUploadWidget(
@@ -35,7 +38,7 @@ function ImageUpload({
     widget.open();
   };
   return (
-    <Button {...buttonProps} onClick={openWidget}>
+    <Button {...buttonProps} onClick={openWidget} style={style}>
       {buttonText}
     </Button>
   );
