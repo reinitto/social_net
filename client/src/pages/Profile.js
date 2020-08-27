@@ -17,13 +17,9 @@ function Profile() {
   }, [profileId]);
   console.log("profile", profile);
   const {
-    bio,
     cover_photo,
-    created,
-    email,
     first_name,
     follow,
-    interests,
     last_name,
     profile_photo,
     social_profiles,

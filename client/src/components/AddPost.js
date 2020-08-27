@@ -1,4 +1,4 @@
-import React, { useState, Fragment } from "react";
+import React, { useState } from "react";
 import ImageUpload from "./ImageUpload";
 import { makeStyles } from "@material-ui/core";
 import { TextInputBox } from "./TextInputBox";
