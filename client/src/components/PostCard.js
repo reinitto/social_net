@@ -19,6 +19,7 @@ import { Skeleton } from "@material-ui/lab";
 import dayjs from "dayjs";
 import { getUserInfo } from "./utils/getUserInfo";
 import Comments from "./Comments";
+import { Link } from "react-router-dom";
 import ThumbUpIcon from "@material-ui/icons/ThumbUp";
 // import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
@@ -32,6 +33,16 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: 500,
     padding: theme.spacing(1),
     margin: theme.spacing(1),
+  },
+  postAuthor: {
+    fontWeight: 600,
+    fontSize: 12,
+    textDecoration: "none",
+    color: "inherit",
+    height: "fit-content",
+    "&:hover": {
+      textDecoration: "underline",
+    },
   },
   media: {
     maxWidth: "100%",
@@ -187,7 +198,7 @@ export default function PostCard({ post }) {
     };
     await fetch(url.href, options);
   };
-  const { profile_photo, first_name, last_name, username } = authorInfo;
+  const { profile_photo, first_name, last_name, username, _id } = authorInfo;
   return (
     <Card className={classes.root}>
       <CardHeader
@@ -224,11 +235,13 @@ export default function PostCard({ post }) {
         }
         title={
           first_name || last_name || username ? (
-            <Typography>
-              {first_name || last_name
-                ? `${first_name} ${last_name}`
-                : `${username}`}
-            </Typography>
+            <Link to={`/profile/${_id}`} className={classes.postAuthor}>
+              <Typography>
+                {first_name || last_name
+                  ? `${first_name} ${last_name}`
+                  : `${username}`}
+              </Typography>
+            </Link>
           ) : (
             <Fragment>
               <Skeleton variant="text" style={{ height: "24px" }} />
