@@ -9,7 +9,7 @@ import {
   makeStyles,
   Container,
 } from "@material-ui/core";
-import { Link, Redirect } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useUser } from "../context/user";
 
 const useStyles = makeStyles((theme) => ({
@@ -34,7 +34,6 @@ const useStyles = makeStyles((theme) => ({
 
 export default function SignIn() {
   const classes = useStyles();
-  const [loggedIn, setLoggedIn] = useState(false);
   const [email, setEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [password, setPassword] = useState("");
@@ -73,14 +72,11 @@ export default function SignIn() {
       if (user) {
         //  set user
         setUser(user);
-        setLoggedIn(true);
       }
-    } catch (err) {}
+    } catch (err) {
+      console.log(err);
+    }
   };
-
-  if (loggedIn) {
-    return <Redirect to="/" />;
-  }
 
   return (
     <Container component="main" maxWidth="xs">

@@ -50,7 +50,7 @@ function Navbar() {
   const logout = async () => {
     const url = "/api/auth/logout";
     await fetch(url);
-    setUser(undefined);
+    setUser(null);
   };
 
   return (

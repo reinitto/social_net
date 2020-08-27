@@ -2,14 +2,13 @@ import React from "react";
 import { Route, Redirect } from "react-router-dom";
 import { useUser } from "../../context/user";
 
-const LoggedOutRoute = ({ component: Component, ...rest }) => {
+const LoggedOutRoute = ({ children, ...rest }) => {
   let { user } = useUser();
   if (user) {
     return <Redirect to="/" />;
+  } else {
+    return <Route {...rest}>{children}</Route>;
   }
-  return (
-    <Route {...rest} render={(props) => <Component {...rest} {...props} />} />
-  );
 };
 
 export default LoggedOutRoute;
