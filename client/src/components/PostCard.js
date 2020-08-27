@@ -94,7 +94,7 @@ const useStyles = makeStyles((theme) => ({
 export default function PostCard({ post }) {
   const classes = useStyles();
   const { user } = useUser();
-  const { body, image, commentCount, likedBy, creator, comments } = post;
+  const { body, image, likedBy, creator, comments } = post;
   const [like, setLike] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [showComments, setShowComments] = useState(false);
@@ -106,16 +106,18 @@ export default function PostCard({ post }) {
     setSettingsVisible(false);
   };
 
-  const getPostCreatorInfo = async (id) => {
-    const user = await getUserInfo(id);
-    user.profile_photo = user.profile_photo.replace(
-      "upload",
-      "upload/w_1000,h_1000,c_crop,g_face/w_100"
-    );
-    setAuthorInfo(user);
-  };
-
   useEffect(() => {
+    let isRendered = true;
+    const getPostCreatorInfo = async (id) => {
+      const user = await getUserInfo(id);
+      user.profile_photo = user.profile_photo.replace(
+        "upload",
+        "upload/w_1000,h_1000,c_crop,g_face/w_100"
+      );
+      if (isRendered) {
+        setAuthorInfo(user);
+      }
+    };
     if (likedBy) {
       if (likedBy.includes(user.id)) {
         setLike(true);
@@ -127,6 +129,7 @@ export default function PostCard({ post }) {
     if (creator) {
       getPostCreatorInfo(creator);
     }
+    return () => (isRendered = false);
   }, [user, likedBy, creator]);
 
   const commentInputRef = useRef(null);

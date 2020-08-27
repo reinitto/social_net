@@ -117,6 +117,7 @@ function Comment({ comment, parentCommentId, postId }) {
   const [liked, setLiked] = useState(false);
   const [likedCount, setLikedCount] = useState(0);
   const { user } = useUser();
+  const userId = user.id || null;
   const [commenter, setCommenter] = useState({
     profile_photo: "",
     first_name: "",
@@ -126,27 +127,35 @@ function Comment({ comment, parentCommentId, postId }) {
   });
   const { creator, text, likedBy = [], replies, created } = comment;
 
-  const getCommenterInfo = async (id) => {
-    const user = await getUserInfo(id);
-    user.profile_photo = `${user.profile_photo}`.replace(
-      "upload",
-      "upload/w_1000,h_1000,c_crop,g_face/w_100"
-    );
-    setCommenter(user);
-  };
+  useEffect(() => {
+    let isRendered = true;
 
-  useEffect(() => {
-    if (likedBy && likedBy.length > 0 && likedBy.includes(user.id)) {
-      setLiked(true);
-      setLikedCount(likedBy.length);
+    if (likedBy && likedBy.length > 0 && likedBy.includes(userId)) {
+      if (isRendered) {
+        setLiked(true);
+        setLikedCount(likedBy.length);
+      }
     }
-  }, [likedBy, user.id]);
+    return () => (isRendered = false);
+  }, [likedBy, userId]);
   useEffect(() => {
+    let isRendered = true;
+    const getCommenterInfo = async (id) => {
+      const user = await getUserInfo(id);
+      if (isRendered) {
+        user.profile_photo = `${user.profile_photo}`.replace(
+          "upload",
+          "upload/w_1000,h_1000,c_crop,g_face/w_100"
+        );
+        setCommenter(user);
+      }
+    };
     if (creator) {
       getCommenterInfo(creator);
     }
+
+    return () => (isRendered = false);
   }, [creator]);
-  useEffect(() => {}, []);
 
   const toggleReplies = () => {
     setReplies(!showReplies);

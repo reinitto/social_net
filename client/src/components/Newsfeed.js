@@ -15,20 +15,26 @@ function Newsfeed({ userId }) {
   const [posts, setPosts] = useState([]);
   const classes = useNewsfeedStyles();
   useEffect(() => {
+    let isRendered = true;
     const getPosts = async () => {
       const feed = await getUserFeed(userId);
-      setPosts(feed);
+      if (isRendered) {
+        setPosts(feed);
+      }
     };
     if (userId) {
       getPosts();
     }
+    return () => {
+      isRendered = false;
+    };
   }, [userId]);
 
   return (
     <div className={classes.newsFeedContainer}>
-      {posts.map((post) => (
-        <PostCard key={post._id} post={post} />
-      ))}
+      {posts &&
+        posts.length > 0 &&
+        posts.map((post) => <PostCard key={post._id} post={post} />)}
     </div>
   );
 }

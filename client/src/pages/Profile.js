@@ -9,11 +9,17 @@ function Profile() {
     window.location.pathname.replace("/profile/", "")
   );
   useEffect(() => {
+    let isRendered = true;
     const updateProfile = async () => {
       const user = await getUserInfo(profileId);
-      setProfile(user);
+      if (isRendered) {
+        setProfile(user);
+      }
     };
-    updateProfile();
+    if (profileId) {
+      updateProfile();
+    }
+    return () => (isRendered = false);
   }, [profileId]);
   console.log("profile", profile);
   const {
