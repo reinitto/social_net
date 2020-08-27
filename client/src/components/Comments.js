@@ -124,7 +124,7 @@ function Comment({ comment, parentCommentId, postId }) {
     username: "",
     _id: "",
   });
-  const { creator, text, likedBy = [], replies, created, _id } = comment;
+  const { creator, text, likedBy = [], replies, created } = comment;
 
   const getCommenterInfo = async (id) => {
     const user = await getUserInfo(id);
@@ -136,12 +136,17 @@ function Comment({ comment, parentCommentId, postId }) {
   };
 
   useEffect(() => {
-    if (likedBy.length > 0 && likedBy.includes(user.id)) {
+    if (likedBy && likedBy.length > 0 && likedBy.includes(user.id)) {
       setLiked(true);
+      setLikedCount(likedBy.length);
     }
-    setLikedCount(likedBy.length);
-    getCommenterInfo(creator);
-  }, [_id, likedBy, user.id, creator]);
+  }, [likedBy, user.id]);
+  useEffect(() => {
+    if (creator) {
+      getCommenterInfo(creator);
+    }
+  }, [creator]);
+  useEffect(() => {}, []);
 
   const toggleReplies = () => {
     setReplies(!showReplies);
