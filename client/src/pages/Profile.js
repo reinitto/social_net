@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Fragment } from "react";
 import { getUserInfo } from "../components/utils/getUserInfo";
 import ProfileHeader from "../components/Profile/ProfileHeader";
 import ProfileNavigation from "../components/Profile/ProfileNavigation";
@@ -31,7 +31,7 @@ function Profile() {
     username,
   } = profile;
   return (
-    <div>
+    <Fragment>
       <ProfileHeader
         profile_photo={profile_photo}
         cover_photo={cover_photo}
@@ -40,12 +40,14 @@ function Profile() {
         username={username}
         social_profiles={social_profiles}
       />
-      <ProfileNavigation
-        follow={follow}
-        profileId={profileId}
-        profile={profile}
-      />
-    </div>
+      <div style={{ maxWidth: "1024px", margin: "auto" }}>
+        <ProfileNavigation
+          follow={follow}
+          profileId={profileId}
+          profile={profile}
+        />
+      </div>
+    </Fragment>
   );
 }
 

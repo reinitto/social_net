@@ -4,7 +4,12 @@ import { ProfilePicture } from "../ProfilePicture";
 import { Typography, makeStyles, Divider } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
+  contentContainer: {
+    width: "100%",
+    background: `linear-gradient(${theme.palette.primary.main},${theme.palette.background.default})`,
+  },
   pictureContainer: {
+    maxWidth: 1024,
     maxHeight: 400,
     display: "flex",
     margin: "auto",
@@ -40,22 +45,24 @@ function ProfileHeader({
     first_name || last_name ? `${first_name} ${last_name}` : username;
   return (
     <Fragment>
-      <div className={classes.pictureContainer}>
-        <BackgroundPicture
-          className={classes.backgroundImage}
-          style={backgroundStyle}
-          src={cover_photo}
-        >
-          <ProfilePicture
-            className={classes.profileImage}
-            src={profile_photo}
-          />
-        </BackgroundPicture>
+      <div className={classes.contentContainer}>
+        <div className={classes.pictureContainer}>
+          <BackgroundPicture
+            className={classes.backgroundImage}
+            style={backgroundStyle}
+            src={cover_photo}
+          >
+            <ProfilePicture
+              className={classes.profileImage}
+              src={profile_photo}
+            />
+          </BackgroundPicture>
+        </div>
+        <Typography className={classes.profileName} variant="h4" align="center">
+          {name}
+        </Typography>
+        <Divider variant="middle" />
       </div>
-      <Typography className={classes.profileName} variant="h4" align="center">
-        {name}
-      </Typography>
-      <Divider variant="middle" />
     </Fragment>
   );
 }

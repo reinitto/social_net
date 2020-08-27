@@ -1,6 +1,6 @@
 import React from "react";
 import { Route, Redirect } from "react-router-dom";
-import PageLayout from "../Layout/PageLayout";
+import ProfilePageLayout from "../Layout/ProfilePageLayout";
 import { useUser } from "../../context/user";
 
 const ProtectedRoute = ({ children, ...rest }) => {
@@ -10,7 +10,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
   }
   return (
     <Route {...rest}>
-      <PageLayout>{children}</PageLayout>
+      <ProfilePageLayout>{children}</ProfilePageLayout>
     </Route>
   );
 };

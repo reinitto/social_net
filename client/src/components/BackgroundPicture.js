@@ -18,6 +18,7 @@ export const BackgroundPicture = ({
       backgroundAttachment: "fixed",
       backgroundSize: "cover",
       overflow: "hidden",
+      borderRadius: "15px",
       ...style,
     },
   }));

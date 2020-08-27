@@ -1,4 +1,6 @@
 import React, { useState, useRef } from "react";
+import { CssBaseline } from "@material-ui/core";
+
 import AccountCircle from "@material-ui/icons/AccountCircle";
 import MenuIcon from "@material-ui/icons/Menu";
 import { appName } from "../../constants";
@@ -8,7 +10,6 @@ import {
   AppBar,
   Toolbar,
   IconButton,
-  FormGroup,
   MenuItem,
   Menu,
 } from "@material-ui/core";
@@ -16,7 +17,6 @@ import { Link } from "react-router-dom";
 import { useUser } from "../../context/user";
 
 const useStyles = makeStyles((theme) => {
-  console.log("theme", theme);
   return {
     menuButton: {
       marginRight: theme.spacing(2),
@@ -55,8 +55,8 @@ function Navbar() {
 
   return (
     <div className={classes.root}>
-      <FormGroup></FormGroup>
-      <AppBar position="static">
+      <CssBaseline />
+      <AppBar position="sticky">
         <Toolbar>
           <IconButton
             edge="start"
