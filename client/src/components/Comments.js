@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import dayjs from "dayjs";
 import {
   Tooltip,
@@ -118,6 +118,7 @@ function Comment({ comment, parentCommentId, postId }) {
   const [liked, setLiked] = useState(false);
   const [likedCount, setLikedCount] = useState(0);
   const { user } = useUser();
+  const commentBoxRef = useRef(null);
   const userId = user.id || null;
   const [commenter, setCommenter] = useState({
     profile_photo: "",
@@ -159,7 +160,14 @@ function Comment({ comment, parentCommentId, postId }) {
   }, [creator]);
 
   const toggleReplies = () => {
-    setReplies(!showReplies);
+    if (showReplies) {
+      setReplies(!showReplies);
+    } else {
+      setReplies(!showReplies);
+      setTimeout(() => {
+        commentBoxRef.current.focus();
+      }, 300);
+    }
   };
 
   const likeComment = async () => {
@@ -297,6 +305,7 @@ function Comment({ comment, parentCommentId, postId }) {
       <CommentsList
         comments={replies}
         showComments={showReplies}
+        commentInputRef={commentBoxRef}
         parentCommentId={
           parentCommentId ? `${parentCommentId}.replies` : comment._id
         }
