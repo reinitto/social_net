@@ -141,10 +141,11 @@ module.exports = function () {
       // add requested user posts
       followings.push(userId);
       followings = new Set(followings);
-
       let feeds = [];
       for (let following of followings) {
-        let posts = await Post.find({ creator: following })
+        let posts = await Post.find({
+          $or: [{ creator: following }, { target: userId }],
+        })
           .sort({ created: -1 })
           .limit(100)
           .exec();

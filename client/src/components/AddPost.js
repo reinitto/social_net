@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ImageUpload from "./ImageUpload";
 import { makeStyles } from "@material-ui/core";
 import { TextInputBox } from "./TextInputBox";
 import { submitPost } from "./utils/submitPost";
+import { getUserIdFromLocation } from "./utils/getUserIdFromLocation";
 
 const usePostStyles = makeStyles((theme) => ({
   container: {
@@ -33,6 +34,12 @@ function AddPost() {
   const [body, setBody] = useState("");
   const [image, setImage] = useState("");
   const [message, setMessage] = useState(["", "inherit"]);
+  const [target, setTarget] = useState("");
+
+  useEffect(() => {
+    let userId = getUserIdFromLocation();
+    setTarget(userId);
+  }, []);
 
   const onImageUpload = {
     success: (result) => {
@@ -46,7 +53,7 @@ function AddPost() {
 
   const onSubmitPost = async () => {
     setMessage("");
-    const { error } = await submitPost({ body, image });
+    const { error } = await submitPost({ body, image, target });
     if (error) {
       setBody("");
       setImage("");

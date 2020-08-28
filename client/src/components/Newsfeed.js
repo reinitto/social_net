@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Fragment } from "react";
 import PostCard from "./PostCard";
+import AddPost from "./AddPost";
 import { makeStyles } from "@material-ui/core";
 import { getUserFeed } from "./utils/getUserFeed";
 
@@ -31,11 +32,14 @@ function Newsfeed({ userId }) {
   }, [userId]);
 
   return (
-    <div className={classes.newsFeedContainer}>
-      {posts &&
-        posts.length > 0 &&
-        posts.map((post) => <PostCard key={post._id} post={post} />)}
-    </div>
+    <Fragment>
+      <AddPost />
+      <div className={classes.newsFeedContainer}>
+        {posts &&
+          posts.length > 0 &&
+          posts.map((post) => <PostCard key={post._id} post={post} />)}
+      </div>
+    </Fragment>
   );
 }
 

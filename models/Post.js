@@ -4,6 +4,7 @@ var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 var PostSchema = new Schema({
   creator: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  target: { type: Schema.Types.ObjectId, ref: "User" },
   body: String,
   image: String,
   likedBy: [Schema.Types.ObjectId],
@@ -13,21 +14,3 @@ var PostSchema = new Schema({
 });
 
 module.exports = mongoose.model("Post", PostSchema);
-
-// Posts:
-//   id:
-//   authorid:
-//   content:
-//   total_views:
-//   tags: array of String
-//   likes: array of Likes {[
-//          liked_by: user_id
-//      ],...}
-//   comments: array of Comments {[
-//      author_id: ...
-//      comment: ...
-//      reactions: array of Comments {[],...}
-//      likes: array of Likes {[
-//          liked_by: user_id
-//           ],...}
-//       ],...}
