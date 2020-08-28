@@ -26,6 +26,10 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 import ThumbUpAltOutlinedIcon from "@material-ui/icons/ThumbUpAltOutlined";
 
 const usePostTitleStyles = makeStyles((theme) => ({
+  postAuthorContainer: {
+    display: "flex",
+    alignItems: "center",
+  },
   postAuthor: {
     fontWeight: 600,
     fontSize: 12,
@@ -63,9 +67,9 @@ const PostTitle = ({
   let authorName =
     first_name || last_name ? `${first_name}${last_name}` : `${username}`;
   return authorName ? (
-    <Fragment>
+    <div className={classes.postAuthorContainer}>
       <Link to={`/profile/${author_id}`} className={classes.postAuthor}>
-        <Typography>
+        <Typography display="inline">
           {first_name || last_name
             ? `${first_name} ${last_name}`
             : `${username}`}
@@ -75,7 +79,7 @@ const PostTitle = ({
         <Fragment>
           <ArrowRightIcon />{" "}
           <Link to={`/profile/${target_id}`} className={classes.postAuthor}>
-            <Typography>
+            <Typography display="inline">
               {targetInfo.first_name || targetInfo.last_name
                 ? `${targetInfo.first_name} ${targetInfo.last_name}`
                 : `${targetInfo.username}`}
@@ -83,7 +87,7 @@ const PostTitle = ({
           </Link>
         </Fragment>
       ) : null}
-    </Fragment>
+    </div>
   ) : (
     <Fragment>
       <Skeleton variant="text" style={{ height: "24px" }} />

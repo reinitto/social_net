@@ -215,8 +215,7 @@ function Comment({ comment, parentCommentId, postId }) {
       setLiked(true);
     }
   };
-  const { _id, profile_photo } = commenter;
-  const { first_name, last_name, username } = user;
+  const { _id, profile_photo, first_name, last_name, username } = commenter;
   return (
     <div className={classes.comment}>
       <div className={classes.commentContainer}>
