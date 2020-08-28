@@ -21,19 +21,11 @@ import { getUserInfo } from "./utils/getUserInfo";
 import Comments from "./Comments";
 import { Link } from "react-router-dom";
 import ThumbUpIcon from "@material-ui/icons/ThumbUp";
-// import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import ThumbUpAltOutlinedIcon from "@material-ui/icons/ThumbUpAltOutlined";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    maxWidth: 500,
-    padding: theme.spacing(1),
-    margin: theme.spacing(1),
-  },
+const usePostTitleStyles = makeStyles((theme) => ({
   postAuthor: {
     fontWeight: 600,
     fontSize: 12,
@@ -43,6 +35,70 @@ const useStyles = makeStyles((theme) => ({
     "&:hover": {
       textDecoration: "underline",
     },
+  },
+}));
+
+const PostTitle = ({
+  first_name,
+  last_name,
+  username,
+  author_id,
+  target_id,
+}) => {
+  const classes = usePostTitleStyles();
+  const [targetInfo, setTargetInfo] = useState(null);
+  useEffect(() => {
+    let isRendered = true;
+    const updateTargetInfo = async () => {
+      const targetUserInfo = await getUserInfo(target_id);
+      if (isRendered) {
+        setTargetInfo(targetUserInfo);
+      }
+    };
+    if (target_id) {
+      updateTargetInfo();
+    }
+    return () => (isRendered = false);
+  }, [target_id]);
+  let authorName =
+    first_name || last_name ? `${first_name}${last_name}` : `${username}`;
+  return authorName ? (
+    <Fragment>
+      <Link to={`/profile/${author_id}`} className={classes.postAuthor}>
+        <Typography>
+          {first_name || last_name
+            ? `${first_name} ${last_name}`
+            : `${username}`}
+        </Typography>
+      </Link>
+      {targetInfo ? (
+        <Fragment>
+          <ArrowRightIcon />{" "}
+          <Link to={`/profile/${target_id}`} className={classes.postAuthor}>
+            <Typography>
+              {targetInfo.first_name || targetInfo.last_name
+                ? `${targetInfo.first_name} ${targetInfo.last_name}`
+                : `${targetInfo.username}`}
+            </Typography>
+          </Link>
+        </Fragment>
+      ) : null}
+    </Fragment>
+  ) : (
+    <Fragment>
+      <Skeleton variant="text" style={{ height: "24px" }} />
+    </Fragment>
+  );
+};
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    maxWidth: 500,
+    padding: theme.spacing(1),
+    margin: theme.spacing(1),
   },
   media: {
     maxWidth: "100%",
@@ -106,13 +162,13 @@ const useStyles = makeStyles((theme) => ({
 export default function PostCard({ post }) {
   const classes = useStyles();
   const { user } = useUser();
-  const { body, image, likedBy, creator, comments } = post;
   const [like, setLike] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [showComments, setShowComments] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [authorInfo, setAuthorInfo] = useState({});
   const anchorEl = useRef(null);
+  const { body, image, likedBy, creator, comments, target } = post;
 
   const handleClose = () => {
     setSettingsVisible(false);
@@ -234,19 +290,13 @@ export default function PostCard({ post }) {
           ) : null
         }
         title={
-          first_name || last_name || username ? (
-            <Link to={`/profile/${_id}`} className={classes.postAuthor}>
-              <Typography>
-                {first_name || last_name
-                  ? `${first_name} ${last_name}`
-                  : `${username}`}
-              </Typography>
-            </Link>
-          ) : (
-            <Fragment>
-              <Skeleton variant="text" style={{ height: "24px" }} />
-            </Fragment>
-          )
+          <PostTitle
+            first_name={first_name}
+            last_name={last_name}
+            username={username}
+            author_id={_id}
+            target_id={target}
+          />
         }
         subheader={
           <span className={classes.subheaderDate}>

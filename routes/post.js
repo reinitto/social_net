@@ -8,11 +8,9 @@ module.exports = function () {
       if (!req.body || !req.body.body) {
         res.status(422).json({ error: "Missing required parameters" });
       } else {
-        const { body, image } = req.body;
         const { _id } = req.user;
         const newPost = new Post({
-          body,
-          image,
+          ...req.body,
           creator: _id,
         });
         try {

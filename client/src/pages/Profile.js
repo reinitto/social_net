@@ -1,13 +1,12 @@
 import React, { useEffect, useState, Fragment } from "react";
+import { useParams } from "react-router-dom";
 import { getUserInfo } from "../components/utils/getUserInfo";
 import ProfileHeader from "../components/Profile/ProfileHeader";
 import ProfileNavigation from "../components/Profile/ProfileNavigation";
 
 function Profile() {
   const [profile, setProfile] = useState({});
-  const [profileId] = useState(
-    window.location.pathname.replace("/profile/", "")
-  );
+  const profileId = useParams().profileId;
   useEffect(() => {
     let isRendered = true;
     const updateProfile = async () => {
