@@ -12,7 +12,7 @@ export const BackgroundPicture = ({
       maxHeight: "100%",
       height: "400px",
       width: "100%",
-      backgroundImage: `url(${src})`,
+      background: src ? `url(${src})` : "",
       backgroundRepeat: "no-repeat",
       backgroundPosition: "center center",
       backgroundAttachment: "fixed",

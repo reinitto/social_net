@@ -16,6 +16,7 @@ function Profile() {
       }
     };
     if (profileId) {
+      console.log("calling get user", profileId);
       updateProfile();
     }
     return () => (isRendered = false);

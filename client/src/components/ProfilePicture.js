@@ -13,12 +13,14 @@ export const ProfilePicture = ({ src, className = "", style = {} }) => {
   const classes = useStyles();
   return (
     <div>
-      <img
-        className={`${classes.profileImage} ${className}`}
-        src={src}
-        alt="profile"
-        loading="lazy"
-      />
+      {src ? (
+        <img
+          className={`${classes.profileImage} ${className}`}
+          src={src}
+          alt="profile"
+          loading="lazy"
+        />
+      ) : null}
     </div>
   );
 };
