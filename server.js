@@ -11,6 +11,7 @@ const cors = require("cors");
 const auth = require("./routes/auth");
 const user = require("./routes/user");
 const post = require("./routes/post");
+const friends = require("./routes/friends");
 const initializePassport = require("./passport/passport-config");
 
 // MIDDLEWARES
@@ -55,6 +56,7 @@ app.use(passport.session());
 app.use("/api/auth", auth(passport));
 app.use("/api/user", isAuthenticated, user());
 app.use("/api/post", isAuthenticated, post());
+app.use("/api/friends", isAuthenticated, friends());
 //Configure Mongoose
 mongoose.connect(
   process.env.MONGODB_URI,
