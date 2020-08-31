@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import TextInputBox from "./TextInputBox";
-import { addComment } from "./utils/addComment";
+import { addComment } from "../utils/addComment";
+import TextInputBox from "../TextInputBox";
 
 export function PostCommentBox({ commentInputRef, postId, commentPath = "" }) {
   const [message, setMessage] = useState(["", ""]);

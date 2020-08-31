@@ -12,11 +12,11 @@ import { Skeleton } from "@material-ui/lab";
 import ThumbUpIcon from "@material-ui/icons/ThumbUp";
 import ScheduleIcon from "@material-ui/icons/Schedule";
 import SubdirectoryArrowRightIcon from "@material-ui/icons/SubdirectoryArrowRight";
-import { getUserInfo } from "./utils/getUserInfo";
+import { getUserInfo } from "../utils/getUserInfo";
 import { PostCommentBox } from "./PostCommentBox";
 import { Link } from "react-router-dom";
 
-import { useUser } from "../context/user";
+import { useUser } from "../../context/user";
 
 const useCommentsStyles = makeStyles((theme) => ({
   comment: {
@@ -103,6 +103,14 @@ const useCommentsStyles = makeStyles((theme) => ({
       width: "7%",
     },
   },
+  avatarSmall: {
+    width: 24,
+    height: 24,
+  },
+  avatarLarge: {
+    width: 40,
+    height: 40,
+  },
 }));
 
 const useCommentsListStyles = makeStyles((theme) => ({
@@ -119,7 +127,7 @@ function Comment({ comment, parentCommentId, postId }) {
   const [likedCount, setLikedCount] = useState(0);
   const { user } = useUser();
   const commentBoxRef = useRef(null);
-  const userId = user.id || null;
+  const userId = (user && user.id) || null;
   const [commenter, setCommenter] = useState({
     profile_photo: "",
     first_name: "",
@@ -225,8 +233,8 @@ function Comment({ comment, parentCommentId, postId }) {
               src={profile_photo}
               className={
                 parentCommentId.length > 5
-                  ? classes.replyAvatar
-                  : classes.commentAvatar
+                  ? classes.avatarSmall
+                  : classes.avatarLarge
               }
               variant="circle"
             />
@@ -235,8 +243,8 @@ function Comment({ comment, parentCommentId, postId }) {
               variant="circle"
               className={
                 parentCommentId.length > 5
-                  ? classes.replyAvatar
-                  : classes.commentAvatar
+                  ? classes.avatarSmall
+                  : classes.avatarLarge
               }
             />
           )}

@@ -84,6 +84,7 @@ export function TextInputBox({
           <Avatar
             src={
               user &&
+              user.profile_photo &&
               user.profile_photo.replace(
                 "upload",
                 "upload/w_1000,h_1000,c_crop,g_face/w_100"

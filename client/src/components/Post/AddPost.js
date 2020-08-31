@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import ImageUpload from "./ImageUpload";
 import { makeStyles } from "@material-ui/core";
-import { TextInputBox } from "./TextInputBox";
-import { submitPost } from "./utils/submitPost";
-import { getUserIdFromLocation } from "./utils/getUserIdFromLocation";
+import ImageUpload from "../ImageUpload";
+import { TextInputBox } from "../TextInputBox";
+import { submitPost } from "../utils/submitPost";
+import { getUserIdFromLocation } from "../utils/getUserIdFromLocation";
 
 const usePostStyles = makeStyles((theme) => ({
   container: {

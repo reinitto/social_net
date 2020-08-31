@@ -1,5 +1,5 @@
 import React, { Fragment } from "react";
-import EditProfile from "../components/EditProfile";
+import EditProfile from "../components/Profile/EditProfile";
 
 function Account() {
   return (

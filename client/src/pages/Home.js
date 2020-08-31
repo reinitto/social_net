@@ -1,13 +1,11 @@
 import React from "react";
-import Newsfeed from "../components/Newsfeed";
 import { useUser } from "../context/user";
+import Newsfeed from "../components/Newsfeed";
+
 function Home() {
   const { user } = useUser();
-  return (
-    <div>
-      <Newsfeed userId={user && user.id} />
-    </div>
-  );
+
+  return <Newsfeed userId={user && user.id} />;
 }
 
 export default Home;

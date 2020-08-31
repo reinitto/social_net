@@ -169,5 +169,22 @@ module.exports = function () {
     }
   });
 
+  router.post("/getUsers", async (req, res) => {
+    console.log("req.body", req.body);
+    if (!req.body || !req.body.userIds) {
+      res.status(422).json({ error: "Missing required parameters" });
+      return;
+    }
+    try {
+      const users = await User.find({
+        _id: { $in: req.body.userIds },
+      });
+      res.json({ users });
+    } catch (error) {
+      console.log(error);
+      res.json({ error: "couldnt find user" });
+    }
+  });
+
   return router;
 };

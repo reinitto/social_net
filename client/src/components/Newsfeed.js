@@ -1,8 +1,8 @@
 import React, { useEffect, useState, Fragment } from "react";
-import PostCard from "./PostCard";
-import AddPost from "./AddPost";
 import { makeStyles } from "@material-ui/core";
 import { getUserFeed } from "./utils/getUserFeed";
+import PostCard from "./Post/PostCard";
+import AddPost from "./Post/AddPost";
 
 const useNewsfeedStyles = makeStyles((theme) => ({
   newsFeedContainer: {

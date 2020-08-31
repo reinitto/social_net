@@ -3,24 +3,49 @@ import { useParams } from "react-router-dom";
 import { getUserInfo } from "../components/utils/getUserInfo";
 import ProfileHeader from "../components/Profile/ProfileHeader";
 import ProfileNavigation from "../components/Profile/ProfileNavigation";
+const defaultProfile = {
+  cover_photo: "",
+  first_name: "",
+  follow: "",
+  last_name: "",
+  profile_photo: "",
+  social_profiles: {
+    facebook: "",
+    twitter: "",
+    instagram: "",
+  },
+  username: "",
+};
 
 function Profile() {
-  const [profile, setProfile] = useState({});
+  const [profile, setProfile] = useState(undefined);
+  const [message, setMessage] = useState("");
   const profileId = useParams().profileId;
   useEffect(() => {
     let isRendered = true;
     const updateProfile = async () => {
       const user = await getUserInfo(profileId);
       if (isRendered) {
-        setProfile(user);
+        if (user) {
+          setProfile(user);
+        } else {
+          setMessage("profile not found");
+        }
       }
     };
     if (profileId) {
-      console.log("calling get user", profileId);
       updateProfile();
     }
     return () => (isRendered = false);
   }, [profileId]);
+
+  if (message) {
+    return <div>{message}</div>;
+  }
+
+  if (!profile) {
+    return <div>Loading</div>;
+  }
   const {
     cover_photo,
     first_name,
@@ -29,7 +54,7 @@ function Profile() {
     profile_photo,
     social_profiles,
     username,
-  } = profile;
+  } = profile || defaultProfile;
   return (
     <Fragment>
       <ProfileHeader

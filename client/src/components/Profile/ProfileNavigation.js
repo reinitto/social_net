@@ -9,8 +9,11 @@ import {
 } from "@material-ui/core";
 import { followUser } from "../utils/follows/followUser";
 import { unFollowUser } from "../utils/follows/unFollowUser";
+import { useUser } from "../../context/user";
+import { useFriends } from "../../context/friends";
 import Newsfeed from "../Newsfeed";
 import About from "./About";
+import { AddFriend } from "../Friends/ActionButtons/AddFriendButton";
 
 let TabPanel = (props) => {
   const { children, value, index, ...other } = props;
@@ -43,15 +46,18 @@ const useStyle = makeStyles((theme) => ({
 
 function ProfileNavigation({ follow = [], profile = {}, profileId }) {
   const classes = useStyle();
+  const { user } = useUser();
+  const { friends } = useFriends();
   const [isFollowing, setIsFollowing] = useState(false);
   const [tabIndex, setTabIndex] = useState(0);
+  const userId = (user && user.id) || null;
   const handleChangeTab = (event, newValue) => {
     setTabIndex(newValue);
   };
 
   useEffect(() => {
     const checkFollowing = () => {
-      let following = follow.includes(profileId);
+      let following = follow.includes(userId);
       if (following) {
         setIsFollowing(true);
       } else {
@@ -59,17 +65,18 @@ function ProfileNavigation({ follow = [], profile = {}, profileId }) {
       }
     };
     checkFollowing();
-  }, [follow, profileId]);
+  }, [follow, userId]);
 
   const toggleFollow = () => {
     if (isFollowing) {
-      unFollowUser(profileId);
+      unFollowUser(userId);
       setIsFollowing(false);
     } else {
-      followUser(profileId);
+      followUser(userId);
       setIsFollowing(true);
     }
   };
+
   return (
     <Fragment>
       <Toolbar className={classes.toolbar}>
@@ -83,6 +90,9 @@ function ProfileNavigation({ follow = [], profile = {}, profileId }) {
           <Tab label="About" />
         </Tabs>
         <div className={classes.actions}>
+          {user && profileId !== user.id ? (
+            <AddFriend friendId={profileId} friends={friends} />
+          ) : null}
           <MenuItem onClick={toggleFollow}>
             {isFollowing ? "Unfollow" : "Follow"}
           </MenuItem>

@@ -1,6 +1,6 @@
 import React from "react";
 import { Route, Redirect } from "react-router-dom";
-import ProfilePageLayout from "../Layout/ProfilePageLayout";
+import WidePageLayout from "../Layout/WidePageLayout";
 import { useUser } from "../../context/user";
 
 const ProtectedRoute = ({ children, ...rest }) => {
@@ -10,7 +10,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
   }
   return (
     <Route {...rest}>
-      <ProfilePageLayout>{children}</ProfilePageLayout>
+      <WidePageLayout>{children}</WidePageLayout>
     </Route>
   );
 };

@@ -97,6 +97,11 @@ function Navbar() {
                     Profile
                   </Link>
                 </MenuItem>
+                <MenuItem onClick={handleClose}>
+                  <Link className={classes.link} to={`/friends`}>
+                    Friends
+                  </Link>
+                </MenuItem>
                 <MenuItem onClick={logout}>Logout</MenuItem>
               </Menu>
             </div>

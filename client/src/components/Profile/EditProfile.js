@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useUser } from "../context/user";
-import ImageUpload from "./ImageUpload";
 import {
   Button,
   TextField,
@@ -9,7 +7,8 @@ import {
   makeStyles,
 } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
-
+import { useUser } from "../../context/user";
+import ImageUpload from "../ImageUpload";
 import { ProfilePicture } from "./ProfilePicture";
 import { BackgroundPicture } from "./BackgroundPicture";
 

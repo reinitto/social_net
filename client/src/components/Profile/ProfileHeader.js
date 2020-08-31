@@ -1,7 +1,7 @@
 import React, { Fragment } from "react";
-import { BackgroundPicture } from "../BackgroundPicture";
-import { ProfilePicture } from "../ProfilePicture";
 import { Typography, makeStyles, Divider } from "@material-ui/core";
+import { BackgroundPicture } from "./BackgroundPicture";
+import { ProfilePicture } from "./ProfilePicture";
 
 const useStyles = makeStyles((theme) => ({
   contentContainer: {

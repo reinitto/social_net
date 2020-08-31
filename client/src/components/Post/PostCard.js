@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, Fragment } from "react";
-import { useUser } from "../context/user";
+import { Link } from "react-router-dom";
 import {
   Card,
   CardHeader,
@@ -16,14 +16,14 @@ import {
   makeStyles,
 } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
-import dayjs from "dayjs";
-import { getUserInfo } from "./utils/getUserInfo";
-import Comments from "./Comments";
-import { Link } from "react-router-dom";
 import ThumbUpIcon from "@material-ui/icons/ThumbUp";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import ThumbUpAltOutlinedIcon from "@material-ui/icons/ThumbUpAltOutlined";
+import dayjs from "dayjs";
+import { useUser } from "../../context/user";
+import { getUserInfo } from "../utils/getUserInfo";
+import Comments from "../Comments/Comments";
 
 const usePostTitleStyles = makeStyles((theme) => ({
   postAuthorContainer: {

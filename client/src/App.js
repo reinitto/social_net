@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Switch, Redirect } from "react-router-dom";
-import { Home, Login, Register, Account, Profile } from "./pages";
+import { Home, Login, Register, Account, Profile, Friends } from "./pages";
 import { CssBaseline } from "@material-ui/core";
 import ProtectedRoute from "./components/Routes/ProtectedRoute";
 import ProfileRoute from "./components/Routes/ProfileRoute";
@@ -15,6 +15,9 @@ function App() {
         </ProtectedRoute>
         <ProtectedRoute exact path="/account">
           <Account />
+        </ProtectedRoute>
+        <ProtectedRoute exact path="/friends">
+          <Friends />
         </ProtectedRoute>
         <ProfileRoute exact path="/profile/:profileId">
           <Profile />
