@@ -1,9 +1,10 @@
 module.exports = function () {
   const express = require("express");
   const GroupConversation = require("../models/GroupConversation");
+  const GroupMessage = require("../models/GroupMessage");
   const router = express.Router();
 
-  const isUserInConversation = async ({ userId, conversationId }) => {
+  const userInConversation = async ({ userId, conversationId }) => {
     const isParticipant = await GroupConversation.findOne({
       _id: conversationId,
       participants: { $elemMatch: { $eq: userId } },
@@ -36,8 +37,6 @@ module.exports = function () {
     try {
       let { participantIds = [], chatName } = req.body;
       const { _id } = req.user;
-      //   const _id = "5f3d81feb8192b4c9457a60a";
-
       participantIds.push(_id);
 
       const groupNewConversation = new GroupConversation({
@@ -66,9 +65,8 @@ module.exports = function () {
     try {
       const { newParticipantId, groupChatId } = req.body;
       const { _id } = req.user;
-      //   const _id = "5f3d81feb8192b4c9457a60a";
       // check if user is part of conversation
-      const userIsAuthorized = await isUserInConversation({
+      const userIsAuthorized = await userInConversation({
         userId: _id,
         conversationId: groupChatId,
       });
@@ -79,7 +77,7 @@ module.exports = function () {
         });
         res.json({ message: "participant added" });
       } else {
-        throw "User is not a part of the chat";
+        throw new Error({ message: "User is not a part of the chat" });
       }
     } catch (error) {
       console.log(error);
@@ -95,8 +93,6 @@ module.exports = function () {
     try {
       const { groupChatId } = req.body;
       const { _id } = req.user;
-      //   const _id = "5f3d81feb8192b4c9457a60a";
-
       await GroupConversation.findByIdAndUpdate(groupChatId, {
         $pull: { participants: _id },
       });
@@ -118,7 +114,6 @@ module.exports = function () {
     try {
       const { participantId, groupChatId } = req.body;
       const { _id } = req.user;
-      //   const _id = "5f3d81feb8192b4c9457a60a";
       // check if user is part of conversation
       const userIsAdmin = await isAdmin({
         userId: _id,
@@ -130,7 +125,9 @@ module.exports = function () {
         });
         res.json({ message: "participant removed" });
       } else {
-        throw "User is not a part of the chat";
+        throw new Error({
+          message: "User is not a part of the chat",
+        });
       }
     } catch (error) {
       console.log(error);
@@ -138,20 +135,34 @@ module.exports = function () {
     }
   });
   // add message to group chat
-  router.post("/group/message", async (req, res) => {
-    if (!req.body || !req.body.groupChatId) {
+  router.post("/group/message/add", async (req, res) => {
+    if (!req.body || !req.body.groupChatId || !req.body.message) {
       res.status(422).json({ error: "Missing required parameters" });
       return;
     }
     try {
-      const { groupChatId } = req.body;
-      const { _id } = req.user;
-      const isPartOfChat = await GroupConversation.findOne({
-        _id: groupChatId,
-        participants: { $elementMatch: _id },
-      });
-
+      const { groupChatId, message } = req.body;
+      //   const { _id } = req.user;
+      const _id = "5f3d81feb8192b4c9457a60a";
       //check if user is part of groupchat
+      const isPartOfChat = await userInConversation({
+        userId: _id,
+        conversationId: groupChatId,
+      });
+      if (isPartOfChat) {
+        // add message
+        let newMessage = new GroupMessage({
+          conversationId: groupChatId,
+          sender: _id,
+          content: message,
+        });
+        newMessage.save();
+        res.json({ message: "message sent" });
+      } else {
+        throw new Error({
+          message: "user not in chat",
+        });
+      }
     } catch (error) {
       console.log(error);
       res.json({ error: "Group message failed" });
@@ -159,6 +170,58 @@ module.exports = function () {
   });
 
   // delete message from group chat
+  router.post("/group/message/remove", async (req, res) => {
+    if (!req.body || !req.body.groupChatId || !req.body.messageId) {
+      res.status(422).json({ error: "Missing required parameters" });
+      return;
+    }
+    try {
+      const { groupChatId, messageId } = req.body;
+      const { _id } = req.user;
+      //   const _id = "5f3d81feb8192b4c9457a60a";
+      //check if user is part of groupchat
+      const isPartOfChat = await userInConversation({
+        userId: _id,
+        conversationId: groupChatId,
+      });
+      if (isPartOfChat) {
+        // add message
+        await GroupMessage.findOneAndDelete({
+          _id: messageId,
+          sender: _id,
+        });
+
+        res.json({ message: "message deleted" });
+      } else {
+        throw new Error({
+          message: "deleting message failed",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      res.json({ error: "action failed" });
+    }
+  });
+
+  router.get("/group/message/:groupChatId", async (req, res) => {
+    try {
+      let { groupChatId } = req.params;
+      let { _id } = req.user;
+      // get all messages
+      const isUserInChat = await userInConversation(_id, groupChatId);
+      if (isUserInChat) {
+        let messages = await GroupMessage.find({ conversationId: groupChatId });
+        res.json({ chatMessages: messages });
+      } else {
+        res.json({ error: "user not in chat" });
+      }
+    } catch (error) {
+      console.log(error);
+      res.json({ error: "couldnt get messages" });
+    }
+  });
+
+  // get chat messages
 
   return router;
 };
