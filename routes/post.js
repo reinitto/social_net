@@ -8,9 +8,11 @@ module.exports = function () {
       if (!req.body || !req.body.body) {
         res.status(422).json({ error: "Missing required parameters" });
       } else {
+        const { body, image } = req.body;
         const { _id } = req.user;
         const newPost = new Post({
-          ...req.body,
+          body,
+          image,
           creator: _id,
         });
         try {
@@ -44,6 +46,7 @@ module.exports = function () {
   // postId, comment contents
   router.post("/comment", async (req, res) => {
     try {
+      console.log("req.body", req.body);
       if (!req.body || !req.body.postId || !req.body.content) {
         res.status(422).json({ error: "Missing required parameters" });
       } else {
