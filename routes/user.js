@@ -170,7 +170,6 @@ module.exports = function () {
   });
 
   router.post("/getUsers", async (req, res) => {
-    console.log("req.body", req.body);
     if (!req.body || !req.body.userIds) {
       res.status(422).json({ error: "Missing required parameters" });
       return;
