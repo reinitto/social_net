@@ -230,6 +230,22 @@ module.exports = function () {
     }
   });
 
+  // add user to read by list
+  router.get("/group/message/read/:messageId", async (req, res) => {
+    try {
+      let readerId = req.user._id;
+      const { messageId } = req.params;
+      // add to read by list
+      await GroupConversation.findByIdAndUpdate(messageId, {
+        $addToSet: { read_by: readerId },
+      });
+      res.json({ message: "added to read list" });
+    } catch (error) {
+      console.log(error);
+      res.status(400).send(new Error("setting message red failed"));
+    }
+  });
+
   // create direct message
   router.post("/direct/messaage/add", async (req, res) => {
     if (!req.body || !req.body.receiverId || !req.body.message) {
@@ -266,6 +282,22 @@ module.exports = function () {
     } catch (error) {
       console.log(error);
       res.status(400).send(new Error("getting messages failed"));
+    }
+  });
+
+  // add user to read by list
+  router.get("/direct/message/read/:messageId", async (req, res) => {
+    try {
+      let readerId = req.user._id;
+      const { messageId } = req.params;
+      // add to read by list
+      await DirectMessage.findByIdAndUpdate(messageId, {
+        $addToSet: { read_by: readerId },
+      });
+      res.json({ message: "added to read list" });
+    } catch (error) {
+      console.log(error);
+      res.status(400).send(new Error("setting message red failed"));
     }
   });
 
