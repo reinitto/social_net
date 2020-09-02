@@ -1,8 +1,16 @@
+const DirectMessage = require("../models/DirectMessage");
+
 module.exports = function () {
   const express = require("express");
   const GroupConversation = require("../models/GroupConversation");
   const GroupMessage = require("../models/GroupMessage");
   const router = express.Router();
+
+  const direct_conversationId = (userId, receiverId) => {
+    return receiverId > userId
+      ? `${receiverId}${userId}`
+      : `${userId}${receiverId}`;
+  };
 
   const userInConversation = async ({ userId, conversationId }) => {
     const isParticipant = await GroupConversation.findOne({
@@ -203,6 +211,7 @@ module.exports = function () {
     }
   });
 
+  // get group chat messages
   router.get("/group/message/:groupChatId", async (req, res) => {
     try {
       let { groupChatId } = req.params;
@@ -221,7 +230,44 @@ module.exports = function () {
     }
   });
 
-  // get chat messages
+  // create direct message
+  router.post("/direct/messaage/add", async (req, res) => {
+    if (!req.body || !req.body.receiverId || !req.body.message) {
+      res.status(422).json({ error: "Missing required parameters" });
+      return;
+    }
+    try {
+      const { message, receiverId } = req.body;
+      const { _id } = req.user;
+      const conversationId = direct_conversationId(_id, receiverId);
+      let newDirectMessage = new DirectMessage({
+        direct_conversationId: conversationId,
+        sender: _id,
+        content: message,
+      });
+      await newDirectMessage.save();
+      res.json({ message: "message added" });
+    } catch (error) {
+      console.log(error);
+      res.json({ error: "coldnt add message" });
+    }
+  });
+
+  // get direct messges
+  router.get("/direct/message/:receiverId", async (req, res) => {
+    try {
+      const { receiverId } = req.params;
+      const { _id } = req.user;
+      const conversationId = direct_conversationId(_id, receiverId);
+      const messages = await DirectMessage.find({
+        direct_conversationId: conversationId,
+      });
+      res.json({ messages });
+    } catch (error) {
+      console.log(error);
+      res.status(400).send(new Error("getting messages failed"));
+    }
+  });
 
   return router;
 };
