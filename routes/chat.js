@@ -7,7 +7,7 @@ module.exports = function () {
   const router = express.Router();
 
   const direct_conversationId = (userId, receiverId) => {
-    return receiverId > userId
+    return `${receiverId}` > `${userId}`
       ? `${receiverId}${userId}`
       : `${userId}${receiverId}`;
   };
@@ -270,14 +270,18 @@ module.exports = function () {
   });
 
   // get direct messges
-  router.get("/direct/message/:receiverId", async (req, res) => {
+  router.get("/direct/message/:chatId", async (req, res) => {
     try {
-      const { receiverId } = req.params;
+      let { chatId } = req.params;
       const { _id } = req.user;
-      const conversationId = direct_conversationId(_id, receiverId);
-      const messages = await DirectMessage.find({
-        direct_conversationId: conversationId,
-      });
+      chatId = chatId.replace(_id, "");
+      const conversationId = direct_conversationId(_id, chatId);
+      const messages = await DirectMessage.find(
+        {
+          direct_conversationId: `${conversationId}`,
+        },
+        "sender content created read_by _id"
+      );
       res.json({ messages });
     } catch (error) {
       console.log(error);

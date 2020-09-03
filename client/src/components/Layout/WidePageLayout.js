@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import { Footer } from "./Footer";
 import { ContactsSideBar } from "../Contacts/ContactsSideBar";
+import { ChatsNavigation } from "../Chat/ChatsNavigation";
 function WidePageLayout({ children }) {
   const location = useLocation();
   // Scroll to top if path changes
@@ -14,6 +15,7 @@ function WidePageLayout({ children }) {
       <Navbar />
       <ContactsSideBar />
       {children}
+      <ChatsNavigation />
       <Footer />
     </Fragment>
   );

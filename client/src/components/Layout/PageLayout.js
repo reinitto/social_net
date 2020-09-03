@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React from "react";
 import WidePageLayout from "./WidePageLayout";
 // import Navbar from "./Navbar";
 // import { Footer } from "./Footer";

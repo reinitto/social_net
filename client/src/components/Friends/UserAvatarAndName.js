@@ -1,7 +1,17 @@
 import React from "react";
-import { Typography, Avatar } from "@material-ui/core";
+import { Typography, Avatar, makeStyles } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
-
+import calculateDisplayName from "../utils/users/calculateDisplayName";
+const useDefaultStyles = makeStyles((theme) => ({
+  container: {
+    display: "flex",
+    alignItems: "center",
+    width: "100%",
+  },
+  avatar: {
+    margin: 8,
+  },
+}));
 // user.profile_photo = user.profile_photo.replace(
 //     "upload",
 //     "upload/w_1000,h_1000,c_crop,g_face/w_100"
@@ -17,22 +27,28 @@ export function UserAvatarAndName({
   textClassNames = "",
   children,
 }) {
+  const defaultClasses = useDefaultStyles();
   const displayName =
     first_name || last_name || username
-      ? first_name || last_name
-        ? `${first_name} ${last_name} `
-        : `${username}`
+      ? calculateDisplayName({
+          username,
+          first_name,
+          last_name,
+        })
       : null;
   return (
-    <div className={`${containerClassNames}`}>
+    <div className={containerClassNames || defaultClasses.container}>
       {profile_photo ? (
         <Avatar
           src={profile_photo}
-          className={avatarClassNames}
+          className={avatarClassNames || defaultClasses.avatar}
           variant="circle"
         />
       ) : (
-        <Skeleton variant="circle" className={avatarClassNames} />
+        <Skeleton
+          variant="circle"
+          className={avatarClassNames || defaultClasses.avatar}
+        />
       )}
       {displayName ? (
         <Typography display="inline" className={textClassNames}>

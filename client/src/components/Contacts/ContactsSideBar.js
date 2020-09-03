@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import GroupRoundedIcon from "@material-ui/icons/GroupRounded";
 import {
@@ -22,6 +21,7 @@ const useDrawerStyles = makeStyles((theme) => ({
     alignItems: "center",
     padding: theme.spacing(0, 1),
     justifyContent: "flex-start",
+    width: 275,
   },
 }));
 
