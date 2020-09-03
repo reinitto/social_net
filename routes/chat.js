@@ -1,7 +1,6 @@
-const DirectMessage = require("../models/DirectMessage");
-
 module.exports = function () {
   const express = require("express");
+  const DirectMessage = require("../models/DirectMessage");
   const GroupConversation = require("../models/GroupConversation");
   const GroupMessage = require("../models/GroupMessage");
   const router = express.Router();
@@ -261,6 +260,11 @@ module.exports = function () {
         sender: _id,
         content: message,
       });
+      const io = req.app.get("socketio");
+      const senderSocket = io.sockets.connected[conversationId];
+      if (senderSocket) {
+        io.in(conversationId).emit(message);
+      }
       await newDirectMessage.save();
       res.json({ message: "message added" });
     } catch (error) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "react-chat-elements/dist/main.css";
 import {
   Accordion,
@@ -8,6 +8,7 @@ import {
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import { MessageList } from "react-chat-elements";
+import socketIOClient from "socket.io-client";
 import { useUser } from "../../context/user";
 import getUserById from "../utils/users/getUsersById";
 import submitDM from "../utils/message/submitDM";
@@ -34,9 +35,14 @@ const useChatStyles = makeStyles((theme) => ({
 }));
 
 function Chat({ removeChat, chatId }) {
+  const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const classes = useChatStyles();
+  const messagesRef = useRef(messages);
+  useEffect(() => {
+    messagesRef.current = messages;
+  });
   const { user } = useUser();
   const [receiver, setReceiver] = useState({
     username: "",
@@ -50,9 +56,44 @@ function Chat({ removeChat, chatId }) {
   const onMessageSubmit = async () => {
     let receiverId = chatId.replace(user.id, "");
     //submit message
+    socket.emit("chat", {
+      room: chatId,
+      message: message,
+    });
     const res = await submitDM({ text: message, receiverId });
     setMessage("");
   };
+
+  const updateMessages = (newMessage) => {
+    console.log("old messages", messagesRef.current);
+    console.log("new message", newMessage);
+    setMessages([...messagesRef.current, newMessage]);
+  };
+
+  const onChatHandler = function (data) {
+    //display data.message
+    const { content, sender, created } = data;
+    const newMessage = {
+      content,
+      created,
+      sender: sender.id,
+      senderInfo: { ...sender },
+    };
+    updateMessages(newMessage);
+
+    // setMessages([...messages, newMessage]);
+  };
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("chat", onChatHandler);
+    }
+    return () => {
+      if (socket) {
+        socket.off("chat", onChatHandler);
+      }
+    };
+  }, [socket]);
 
   useEffect(() => {
     // receiver info
@@ -72,6 +113,30 @@ function Chat({ removeChat, chatId }) {
   }, [chatId, user.id]);
 
   useEffect(() => {
+    if (chatId) {
+      setSocket(socketIOClient());
+    }
+    // CLEAN UP THE EFFECT
+    return () => {
+      if (socket) {
+        socket.disconnect();
+      }
+    };
+    //
+  }, [chatId]);
+
+  useEffect(() => {
+    if (socket) {
+      socket.emit("join", chatId);
+    }
+    return () => {
+      if (socket) {
+        socket.emit("leave", chatId);
+      }
+    };
+  }, [socket]);
+
+  useEffect(() => {
     let isRendered = true;
     const getChatMessages = async (chatId) => {
       let isGroup = chatId.length > 24 ? false : true;
@@ -82,8 +147,7 @@ function Chat({ removeChat, chatId }) {
       if (isRendered) {
         const { messages, error } = await data.json();
         if (messages) {
-          console.log("chat messages", messages);
-          setMessages(messages);
+          setMessages([...messages]);
         } else {
           console.log("error");
         }
@@ -95,7 +159,6 @@ function Chat({ removeChat, chatId }) {
   const closeChat = () => {
     removeChat(chatId);
   };
-  console.log("receiver", receiver);
   return (
     <Accordion className={classes.container}>
       <AccordionSummary
