@@ -98,7 +98,6 @@ function Chat({
     e.stopPropagation();
     closeChat(chatId);
   };
-  console.log("messages", messages);
   return (
     <Accordion className={classes.container}>
       <AccordionSummary

@@ -12,6 +12,7 @@ import getChatMessages from "../components/utils/message/getChatMessages";
 const ConversationsContext = createContext();
 export default function ConversationsProvider({ children }) {
   const [socket, setSocket] = useState(null);
+  const [socketId, setSocketId] = useState(null);
   const [directConversations, setDirectConversations] = useState([]);
   const directConversationsRef = useRef(null);
 
@@ -19,7 +20,7 @@ export default function ConversationsProvider({ children }) {
     directConversationsRef.current = directConversations;
   });
   // const [groupConversations, setGroupConversations] = useState([]);
-  const { user } = useUser();
+  const { userId, user } = useUser();
   const addMessageToConversation = (data) => {
     const newConvos = directConversationsRef.current.map((convo) => {
       if (convo.conversationId === data.room) {
@@ -35,13 +36,12 @@ export default function ConversationsProvider({ children }) {
 
   useEffect(() => {
     const setLocalStorageConversations = () => {
-      //   // set local storage
       const openChats = directConversationsRef.current.filter(
         (convo) => convo.open === true
       );
-      if (user && user.id) {
+      if (userId) {
         window.localStorage.setItem(
-          user.id,
+          userId,
           JSON.stringify({
             activeChats: openChats,
           })
@@ -49,25 +49,28 @@ export default function ConversationsProvider({ children }) {
       }
     };
 
-    if (user && user.id && !socket) {
-      let socket = socketIOClient();
+    if (userId && !socket) {
+      let socket = socketIOClient("/", {
+        query: { userId },
+      });
       setSocket(socket);
+
+      socket.on("connect", () => {
+        setSocketId(socket.id);
+      });
+      socket.on("chat", addMessageToConversation);
     }
     return () => {
       if (socket) {
         setLocalStorageConversations();
+        socket.off("chat");
         socket.disconnect();
       }
     };
-  }, [user]);
+  }, [userId, socket]);
 
   useEffect(() => {
-    const joinRooms = ({ dms, socket }) => {
-      let convoIds = dms.map((dm) => dm.conversationId);
-      convoIds.forEach((id) => {
-        socket.emit("join", id);
-      });
-    };
+    let isRendered = true;
     const getConversationsFromLocalStorage = async ({ userId }) => {
       let localUserInfo = window.localStorage.getItem(userId);
       localUserInfo = localUserInfo ? JSON.parse(localUserInfo) : [];
@@ -76,31 +79,32 @@ export default function ConversationsProvider({ children }) {
       return activeChats.map((chat) => (chat = chat.conversationId));
     };
 
-    const getDms = async (socket) => {
-      const url = "/api/chat/direct/all";
-      const res = await fetch(url);
-      const { directConversations } = await res.json();
-      let newDms = await getConversationsFromLocalStorage({
-        userId: user.id,
-      });
-      let dmsWithOpenFlag = directConversations.map((dm) => ({
-        ...dm,
-        messages: [],
-        open: newDms.includes(dm.conversationId) ? true : false,
-      }));
-      setDirectConversations(dmsWithOpenFlag);
-      await joinRooms({ dms: directConversations, socket });
-    };
-    if (socket) {
-      getDms(socket);
-      socket.on("chat", addMessageToConversation);
-    }
-    return () => {
-      if (socket) {
-        socket.off("chat");
+    const getDms = async () => {
+      try {
+        const url = "/api/chat/direct/all";
+        const res = await fetch(url);
+        const { directConversations } = await res.json();
+        let newDms = await getConversationsFromLocalStorage({
+          userId,
+        });
+        let dmsWithOpenFlag = directConversations.map((dm) => ({
+          ...dm,
+          messages: [],
+          open: newDms.includes(dm.conversationId) ? true : false,
+        }));
+        if (isRendered) {
+          setDirectConversations(dmsWithOpenFlag);
+        }
+      } catch (error) {
+        console.log(error);
       }
     };
-  }, [socket]);
+    getDms();
+
+    return () => {
+      isRendered = false;
+    };
+  }, [userId]);
 
   const directMessage = async ({ message, receiverId }) => {
     await submitDM({ text: message, receiverId });
@@ -121,7 +125,7 @@ export default function ConversationsProvider({ children }) {
     openChats = Array.from(new Set(openChats));
     // set local storage
     window.localStorage.setItem(
-      user.id,
+      userId,
       JSON.stringify({
         activeChats: openChats,
       })
@@ -143,7 +147,7 @@ export default function ConversationsProvider({ children }) {
     openChats = Array.from(new Set(openChats));
     // set local storage
     window.localStorage.setItem(
-      user.id,
+      userId,
       JSON.stringify({
         activeChats: openChats,
       })

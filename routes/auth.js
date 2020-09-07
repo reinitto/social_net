@@ -96,7 +96,8 @@ module.exports = function (passport) {
       id,
       friends,
     } = req.user;
-    res.json({
+    // calculate dm room ids
+    const roomIds = res.json({
       user: {
         email,
         username,

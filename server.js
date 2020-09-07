@@ -8,13 +8,17 @@ const MongoStore = require("connect-mongo")(session);
 const mongoose = require("mongoose");
 const passport = require("passport");
 const cors = require("cors");
+const Friends = require("./models/Friends");
 const auth = require("./routes/auth");
 const user = require("./routes/user");
 const post = require("./routes/post");
 const friends = require("./routes/friends");
 const chat = require("./routes/chat");
 const initializePassport = require("./passport/passport-config");
-
+const {
+  direct_conversationId,
+} = require("./routes/utils/calculateConversationId");
+const User = require("./models/User");
 // MIDDLEWARES ///
 const logger = (req, res, next) => {
   console.log("req.session", req.session);
@@ -86,16 +90,26 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
   console.log(`Connected: ${socket.id}`);
+  const userId = socket.handshake.query["userId"];
+  let friendIds = await Friends.find({
+    requester: userId,
+    status: "FRIENDS",
+  });
+  friendIds = friendIds.map((friend) => friend.recipient);
+
+  const roomIds = friendIds.map((friendId) =>
+    direct_conversationId(friendId, userId)
+  );
+  console.log("roomIds", roomIds);
+  socket.join(roomIds, () => {
+    console.log(userId, "joined rooms", socket.rooms);
+  });
   io.of("/").clients((error, clients) => {
     if (error) throw error;
-    console.log("clients", clients); // => [PZDoMHjiu8PYfRiKAAAF, Anw2LatarvGVVXEIAAAD]
+    console.log("clients", clients);
   });
   socket.on("disconnect", () => console.log(`Disconnected: ${socket.id}`));
-  socket.on("join", (room) => {
-    console.log(`Socket ${socket.id} joining ${room}`);
-    socket.join(room);
-  });
 });
 server.listen(PORT, () => console.log(`Server listening on port ${PORT}`));

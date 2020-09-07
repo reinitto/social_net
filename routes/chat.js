@@ -3,12 +3,13 @@ const DirectMessage = require("../models/DirectMessage");
 const DirectConversation = require("../models/DirectConversation");
 const GroupConversation = require("../models/GroupConversation");
 const GroupMessage = require("../models/GroupMessage");
+const { direct_conversationId } = require("./utils/calculateConversationId");
 const router = express.Router();
-const direct_conversationId = (userId, receiverId) => {
-  return `${receiverId}` > `${userId}`
-    ? `${receiverId}${userId}`
-    : `${userId}${receiverId}`;
-};
+// const direct_conversationId = (userId, receiverId) => {
+//   return `${receiverId}` > `${userId}`
+//     ? `${receiverId}${userId}`
+//     : `${userId}${receiverId}`;
+// };
 const userInConversation = async ({ userId, conversationId }) => {
   const isParticipant = await GroupConversation.findOne({
     _id: conversationId,
@@ -324,7 +325,7 @@ module.exports = function () {
           "sender content created _id"
         )
           .limit(count)
-          .sort("-_id")
+          .sort("-created")
           .populate("sender");
       }
       // set directChat  last viewed to now.
@@ -332,7 +333,7 @@ module.exports = function () {
       res.json({ messages });
     } catch (error) {
       console.log(error);
-      res.status(400).send(new Error("getting messages failed"));
+      res.status(400).send({ error: "getting messges failed" });
     }
   });
 

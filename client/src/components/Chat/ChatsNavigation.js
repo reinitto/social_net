@@ -28,9 +28,7 @@ export function ChatsNavigation() {
   } = useConversations();
   const classes = useChatNavigationStyles();
   // chats ids have to be checked, if a really long one its dm otherwise group
-  console.log("directConversations", directConversations);
   const openChats = directConversations.filter((convo) => convo.open === true);
-  console.log("openChats", openChats);
   return (
     <div
       className={`${classes.container} ${

@@ -120,7 +120,6 @@ module.exports = function () {
 
       // From friends collection find all matching documents
       // then, if status is FRIENDS take the recipient field and use as _id to match documents in User collection and return as an array of confirmed friends
-      console.log("requested friendsList", ids);
       // let userFriends = await Friends.find({ _id: { $in: ids } });
       // console.log("user friendships", userFriends);
       let userFriends = await Friends.aggregate([
@@ -159,7 +158,7 @@ module.exports = function () {
         // },
       ]);
       let friendLists = {};
-      console.log("userFriends", userFriends);
+      // console.log("userFriends", userFriends);
       userFriends.forEach(async (col) => {
         if (col._id === "PENDING") {
           friendLists.pending = col.friends.map(
