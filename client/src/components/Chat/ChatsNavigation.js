@@ -20,18 +20,26 @@ const useChatNavigationStyles = makeStyles((theme) => ({
 }));
 
 export function ChatsNavigation() {
-  let { chats, addChat, removeChat } = useConversations();
+  let { closeChat, messageRoom, directConversations } = useConversations();
   const classes = useChatNavigationStyles();
-  console.log("chats", chats);
   // chats ids have to be checked, if a really long one its dm otherwise group
+  console.log("directConversations", directConversations);
+  const openChats = directConversations.filter((convo) => convo.open === true);
+  console.log("openChats", openChats);
   return (
     <div
       className={`${classes.container} ${
-        chats.length > 0 ? `${classes.visible}` : `${classes.hidden}`
+        openChats.length > 0 ? `${classes.visible}` : `${classes.hidden}`
       }`}
     >
-      {chats.map((chat) => (
-        <Chat key={chat} removeChat={removeChat} chatId={chat} />
+      {openChats.map((chat) => (
+        <Chat
+          key={chat.conversationId}
+          closeChat={closeChat}
+          chatId={chat.conversationId}
+          messageRoom={messageRoom}
+          messages={chat.messages}
+        />
       ))}
     </div>
   );

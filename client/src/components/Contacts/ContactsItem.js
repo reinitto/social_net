@@ -18,12 +18,12 @@ const useContactItemStyles = makeStyles((theme) => ({
 
 export function ContactsItem({ contact }) {
   const classes = useContactItemStyles();
-  const { addChat } = useConversations();
+  const { openChat } = useConversations();
   const { user } = useUser();
   //Onclick opens conversation
   const addConversation = () => {
     let chatId = calculateDmId(user.id, contact._id);
-    addChat(chatId);
+    openChat(chatId);
     //check conversation tab
     //if conversation id is in tab, open it
     // else

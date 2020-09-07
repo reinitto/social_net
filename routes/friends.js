@@ -1,8 +1,15 @@
 // FRIENDSHIP STATUSES
 // "NOT_FRIENDS", "REQUESTED", "PENDING", "FRIENDS"
+const direct_conversationId = (userId, receiverId) => {
+  return `${receiverId}` > `${userId}`
+    ? `${receiverId}${userId}`
+    : `${userId}${receiverId}`;
+};
 module.exports = function () {
   const User = require("../models/User");
   const Friends = require("../models/Friends");
+  const Participant = require("../models/Participant");
+  const DirectConversation = require("../models/DirectConversation");
   const express = require("express");
   const mongoose = require("mongoose");
   const ObjectId = mongoose.Types.ObjectId;
@@ -57,6 +64,12 @@ module.exports = function () {
         { recipient: UserA, requester: UserB },
         { $set: { status: "FRIENDS", created: new Date() } }
       ).exec();
+      // create directConversation
+      let newDm = DirectConversation({
+        participants: [{ user: UserA }, { user: UserB }],
+        conversationId: direct_conversationId(UserA, UserB),
+      });
+      newDm.save();
       res.json({ status: "OK" });
     } catch (error) {
       console.log(error);

@@ -88,13 +88,10 @@ if (process.env.NODE_ENV === "production") {
 
 io.on("connection", (socket) => {
   console.log(`Connected: ${socket.id}`);
-  const {
-    username,
-    first_name,
-    last_name,
-    profile_photo,
-    id,
-  } = socket.request.user;
+  io.of("/").clients((error, clients) => {
+    if (error) throw error;
+    console.log("clients", clients); // => [PZDoMHjiu8PYfRiKAAAF, Anw2LatarvGVVXEIAAAD]
+  });
   socket.on("disconnect", () => console.log(`Disconnected: ${socket.id}`));
   socket.on("join", (room) => {
     console.log(`Socket ${socket.id} joining ${room}`);
@@ -104,15 +101,22 @@ io.on("connection", (socket) => {
     console.log("leaving room", room);
     socket.leave(room);
   });
-  socket.on("chat", (data) => {
-    const { message, room } = data;
-    console.log(`msg: ${message}, room: ${room}`);
-    io.to(room).emit("chat", {
-      content: message,
-      sender: { username, first_name, last_name, profile_photo, id },
-      created: Date.now(),
-    });
-  });
+  // socket.on("chat", (data) => {
+  //   const {
+  //     username,
+  //     first_name,
+  //     last_name,
+  //     profile_photo,
+  //     id,
+  //   } = socket.request.user;
+  //   const { message, room } = data;
+  //   console.log(`msg: ${message}, room: ${room}`);
+  //   io.to(room).emit("chat", {
+  //     content: message,
+  //     sender: { username, first_name, last_name, profile_photo, id },
+  //     created: Date.now(),
+  //   });
+  // });
 });
 // io.of("/admin").use(async (socket, next) => {
 //   const user = await fetchUser(socket.handshake.query);

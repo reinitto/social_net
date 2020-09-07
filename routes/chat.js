@@ -1,39 +1,70 @@
+const express = require("express");
+const DirectMessage = require("../models/DirectMessage");
+const DirectConversation = require("../models/DirectConversation");
+const GroupConversation = require("../models/GroupConversation");
+const GroupMessage = require("../models/GroupMessage");
+const router = express.Router();
+const direct_conversationId = (userId, receiverId) => {
+  return `${receiverId}` > `${userId}`
+    ? `${receiverId}${userId}`
+    : `${userId}${receiverId}`;
+};
+const userInConversation = async ({ userId, conversationId }) => {
+  const isParticipant = await GroupConversation.findOne({
+    _id: conversationId,
+    participants: { $elemMatch: { $eq: userId } },
+  });
+  if (isParticipant) {
+    return true;
+  } else {
+    return false;
+  }
+};
+const isAdmin = async ({ userId, conversationId }) => {
+  const isAdminOfChat = await GroupConversation.findOne({
+    _id: conversationId,
+    admin: userId,
+  });
+  if (isAdminOfChat) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+const updateLastViewed = async ({ conversationId, userId }) => {
+  try {
+    await DirectConversation.findOneAndUpdate(
+      {
+        conversationId,
+        "participants.user": userId,
+      },
+      {
+        $set: { "participants.$.last_viewed": Date.now() },
+      }
+    );
+    return { ok: true };
+  } catch (error) {
+    return { ok: false };
+  }
+};
+
+const updateLastMessage = async (conversationId) => {
+  try {
+    await DirectConversation.findOneAndUpdate(
+      { conversationId },
+      {
+        $set: {
+          last_message: Date.now(),
+        },
+      }
+    );
+  } catch (error) {
+    console.log("update last viewed failed");
+  }
+};
+
 module.exports = function () {
-  const express = require("express");
-  const DirectMessage = require("../models/DirectMessage");
-  const GroupConversation = require("../models/GroupConversation");
-  const GroupMessage = require("../models/GroupMessage");
-  const router = express.Router();
-
-  const direct_conversationId = (userId, receiverId) => {
-    return `${receiverId}` > `${userId}`
-      ? `${receiverId}${userId}`
-      : `${userId}${receiverId}`;
-  };
-
-  const userInConversation = async ({ userId, conversationId }) => {
-    const isParticipant = await GroupConversation.findOne({
-      _id: conversationId,
-      participants: { $elemMatch: { $eq: userId } },
-    });
-    if (isParticipant) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-  const isAdmin = async ({ userId, conversationId }) => {
-    const isAdminOfChat = await GroupConversation.findOne({
-      _id: conversationId,
-      admin: userId,
-    });
-    if (isAdminOfChat) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
   // create group chat
   router.post("/group/create", async (req, res) => {
     console.log("POST /group/create");
@@ -230,20 +261,20 @@ module.exports = function () {
   });
 
   // add user to read by list
-  router.get("/group/message/read/:messageId", async (req, res) => {
-    try {
-      let readerId = req.user._id;
-      const { messageId } = req.params;
-      // add to read by list
-      await GroupConversation.findByIdAndUpdate(messageId, {
-        $addToSet: { read_by: readerId },
-      });
-      res.json({ message: "added to read list" });
-    } catch (error) {
-      console.log(error);
-      res.status(400).send(new Error("setting message red failed"));
-    }
-  });
+  // router.get("/group/message/read/:messageId", async (req, res) => {
+  //   try {
+  //     let readerId = req.user._id;
+  //     const { messageId } = req.params;
+  //     // add to read by list
+  //     await GroupConversation.findByIdAndUpdate(messageId, {
+  //       $addToSet: { read_by: readerId },
+  //     });
+  //     res.json({ message: "added to read list" });
+  //   } catch (error) {
+  //     console.log(error);
+  //     res.status(400).send(new Error("setting message red failed"));
+  //   }
+  // });
 
   // create direct message
   router.post("/direct/messaage/add", async (req, res) => {
@@ -253,19 +284,27 @@ module.exports = function () {
     }
     try {
       const { message, receiverId } = req.body;
-      const { _id } = req.user;
-      const conversationId = direct_conversationId(_id, receiverId);
+      const { username, first_name, last_name, profile_photo, id } = req.user;
+      const conversationId = direct_conversationId(id, receiverId);
       let newDirectMessage = new DirectMessage({
         direct_conversationId: conversationId,
-        sender: _id,
+        sender: id,
         content: message,
       });
       const io = req.app.get("socketio");
-      const senderSocket = io.sockets.connected[conversationId];
-      if (senderSocket) {
-        io.in(conversationId).emit(message);
-      }
+
+      io.to(conversationId).emit("chat", {
+        content: message,
+        sender: { username, first_name, last_name, profile_photo, id },
+        room: conversationId,
+        created: Date.now(),
+      });
+
       await newDirectMessage.save();
+      // set directChat  last viewed to now
+      await updateLastViewed({ conversationId, userId: id });
+      await updateLastMessage(conversationId);
+
       res.json({ message: "message added" });
     } catch (error) {
       console.log(error);
@@ -286,6 +325,8 @@ module.exports = function () {
         },
         "sender content created read_by _id"
       );
+      // set directChat  last viewed to now.
+      await updateLastViewed({ conversationId, userId: _id });
       res.json({ messages });
     } catch (error) {
       console.log(error);
@@ -293,19 +334,18 @@ module.exports = function () {
     }
   });
 
-  // add user to read by list
-  router.get("/direct/message/read/:messageId", async (req, res) => {
+  // get user directConversations
+  router.get("/direct/all", async (req, res) => {
     try {
-      let readerId = req.user._id;
-      const { messageId } = req.params;
-      // add to read by list
-      await DirectMessage.findByIdAndUpdate(messageId, {
-        $addToSet: { read_by: readerId },
+      const { _id: userId } = req.user;
+      let dmChats = await DirectConversation.find({
+        participants: { $elemMatch: { user: userId } },
       });
-      res.json({ message: "added to read list" });
+      console.log("dmChats", dmChats);
+      res.json({ directConversations: dmChats });
     } catch (error) {
       console.log(error);
-      res.status(400).send(new Error("setting message red failed"));
+      res.status(400).send(new Error("getting direct chats failed"));
     }
   });
 

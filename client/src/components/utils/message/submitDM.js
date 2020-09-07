@@ -1,6 +1,6 @@
-export const submitDM = async ({ receiverId, text }) => {
+export const submitDM = async ({ receiverId, text, room }) => {
   const url = "/api/chat/direct/messaage/add";
-  const payload = { receiverId, message: text };
+  const payload = { receiverId, room, message: text };
   const options = {
     method: "post",
     headers: {

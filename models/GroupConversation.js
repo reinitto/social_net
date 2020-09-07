@@ -1,8 +1,10 @@
 var mongoose = require("mongoose");
+var participant = require("./Participant");
+
 var Schema = mongoose.Schema;
 var GroupConversation = new Schema({
   admin: [{ type: Schema.Types.ObjectId, ref: "User", required: true }],
-  participants: [{ type: Schema.Types.ObjectId, ref: "User" }],
+  participants: [participant],
   name: String,
   created: { type: Date, default: Date.now },
 });
