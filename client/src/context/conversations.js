@@ -8,9 +8,8 @@ import React, {
 import socketIOClient from "socket.io-client";
 import { useUser } from "./user";
 import submitDM from "../components/utils/message/submitDM";
-
+import getChatMessages from "../components/utils/message/getChatMessages";
 const ConversationsContext = createContext();
-
 export default function ConversationsProvider({ children }) {
   const [socket, setSocket] = useState(null);
   const [directConversations, setDirectConversations] = useState([]);
@@ -40,12 +39,14 @@ export default function ConversationsProvider({ children }) {
       const openChats = directConversationsRef.current.filter(
         (convo) => convo.open === true
       );
-      window.localStorage.setItem(
-        user.id,
-        JSON.stringify({
-          activeChats: openChats,
-        })
-      );
+      if (user && user.id) {
+        window.localStorage.setItem(
+          user.id,
+          JSON.stringify({
+            activeChats: openChats,
+          })
+        );
+      }
     };
 
     if (user && user.id && !socket) {
@@ -128,19 +129,15 @@ export default function ConversationsProvider({ children }) {
   };
   const closeChat = (chatId) => {
     // set open flag
-    console.log(
-      "directConversationsRef.current",
-      directConversationsRef.current
-    );
     let newOpenChats = directConversationsRef.current.map((dm) => {
       if (dm.conversationId === chatId) {
         dm.open = false;
+        dm.messages = [];
         return dm;
       } else {
         return dm;
       }
     });
-    console.log("newOpenChats", newOpenChats);
     setDirectConversations(newOpenChats);
     let openChats = newOpenChats.filter((chat) => chat.open === true);
     openChats = Array.from(new Set(openChats));
@@ -153,6 +150,21 @@ export default function ConversationsProvider({ children }) {
     );
   };
 
+  const updateConversationMessages = async ({ chatId, limit, date, skip }) => {
+    try {
+      const { messages } = await getChatMessages({ chatId, limit, date, skip });
+      let dm = directConversationsRef.current.map((convo) => {
+        if (convo.conversationId === chatId) {
+          convo.messages.push(...messages);
+        }
+        return convo;
+      });
+      setDirectConversations(dm);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <ConversationsContext.Provider
       value={{
@@ -160,6 +172,7 @@ export default function ConversationsProvider({ children }) {
         closeChat,
         messageRoom: directMessage,
         directConversations,
+        updateConversationMessages,
       }}
     >
       {children}

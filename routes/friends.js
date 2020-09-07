@@ -65,7 +65,7 @@ module.exports = function () {
         { $set: { status: "FRIENDS", created: new Date() } }
       ).exec();
       // create directConversation
-      let newDm = DirectConversation({
+      let newDm = DirectConversation.findOneAndUpdate({
         participants: [{ user: UserA }, { user: UserB }],
         conversationId: direct_conversationId(UserA, UserB),
       });

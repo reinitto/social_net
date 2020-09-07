@@ -23,7 +23,7 @@ export default function FriendsProvider({ children }) {
       getAllFriends(user.friends);
     }
   }, [user]);
-
+  console.log("friends", friends);
   return (
     <FriendsContext.Provider value={{ friends }}>
       {children}

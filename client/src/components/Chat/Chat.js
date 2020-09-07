@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import "react-chat-elements/dist/main.css";
 import {
   Accordion,
@@ -32,7 +32,14 @@ const useChatStyles = makeStyles((theme) => ({
   },
 }));
 
-function Chat({ closeChat, chatId, messageRoom, messages }) {
+function Chat({
+  chat,
+  closeChat,
+  chatId,
+  messageRoom,
+  messages,
+  updateConversationMessages,
+}) {
   const [message, setMessage] = useState("");
   const classes = useChatStyles();
   const { user } = useUser();
@@ -54,6 +61,24 @@ function Chat({ closeChat, chatId, messageRoom, messages }) {
   };
 
   useEffect(() => {
+    // get new messages if they exist
+    const { last_message, participants } = chat;
+    let last_viewed = Date.now();
+    let date = null;
+    participants.forEach((participant) => {
+      if (participant.user === user.id) {
+        last_viewed = participant.last_viewed;
+      }
+    });
+    if (last_message > last_viewed) {
+      console.log("new messages");
+      date = last_viewed;
+    }
+    updateConversationMessages({ chatId, date });
+    // get last 10 otherwise
+  }, []);
+
+  useEffect(() => {
     // receiver info
     let isRendered = true;
     const getReceiverInfo = async () => {
@@ -73,8 +98,7 @@ function Chat({ closeChat, chatId, messageRoom, messages }) {
     e.stopPropagation();
     closeChat(chatId);
   };
-  console.log("chat messages", messages);
-  console.log("user.id", user.id);
+  console.log("messages", messages);
   return (
     <Accordion className={classes.container}>
       <AccordionSummary

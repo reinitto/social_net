@@ -97,34 +97,5 @@ io.on("connection", (socket) => {
     console.log(`Socket ${socket.id} joining ${room}`);
     socket.join(room);
   });
-  socket.on("leave", function (room) {
-    console.log("leaving room", room);
-    socket.leave(room);
-  });
-  // socket.on("chat", (data) => {
-  //   const {
-  //     username,
-  //     first_name,
-  //     last_name,
-  //     profile_photo,
-  //     id,
-  //   } = socket.request.user;
-  //   const { message, room } = data;
-  //   console.log(`msg: ${message}, room: ${room}`);
-  //   io.to(room).emit("chat", {
-  //     content: message,
-  //     sender: { username, first_name, last_name, profile_photo, id },
-  //     created: Date.now(),
-  //   });
-  // });
 });
-// io.of("/admin").use(async (socket, next) => {
-//   const user = await fetchUser(socket.handshake.query);
-//   if (user.isAdmin) {
-//     socket.user = user;
-//     next();
-//   } else {
-//     next(new Error("forbidden"));
-//   }
-// });
 server.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
