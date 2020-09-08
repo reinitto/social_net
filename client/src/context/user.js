@@ -39,8 +39,6 @@ export default function UserProvider({ children }) {
       },
       body: JSON.stringify({ email, password }),
     });
-    console.log("res.status", res.status);
-
     try {
       let data = await res.json();
       let { error, user } = data;

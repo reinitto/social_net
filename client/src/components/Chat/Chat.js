@@ -58,7 +58,7 @@ function Chat({
   chatId,
   messageRoom,
   messages,
-  updateConversationMessages,
+  getInitialChatMessages,
   i,
 }) {
   const [message, setMessage] = useState("");
@@ -71,29 +71,10 @@ function Chat({
   const onMessageSubmit = async () => {
     let receiverId = chatId.replace(user.id, "");
     //submit message
-    console.log("onMessageSubmit clicked");
     await messageRoom({ room: chatId, message, receiverId });
 
     setMessage("");
   };
-
-  useEffect(() => {
-    // get new messages if they exist
-    const { last_message, participants } = chat;
-    let last_viewed = null;
-    let date = null;
-    participants.forEach((participant) => {
-      if (participant.user === user.id) {
-        last_viewed = participant.last_viewed;
-      }
-    });
-    if (last_message > last_viewed) {
-      date = last_viewed;
-    }
-    updateConversationMessages({ chatId, date });
-    // get last 10 otherwise
-    //eslint-disable-next-line
-  }, []);
 
   useEffect(() => {
     // receiver info
@@ -118,8 +99,31 @@ function Chat({
     e.stopPropagation();
     closeChat(chatId);
   };
+
+  const accordionExpandToggle = (e, expanded) => {
+    // if accordion is being opened and there are currently no messages loaded in chat
+    if (expanded && messages.length === 0) {
+      const { last_message, participants } = chat;
+      let last_viewed = null;
+      let date = null;
+      participants.forEach((participant) => {
+        if (participant.user === user.id) {
+          last_viewed = participant.last_viewed;
+        }
+      });
+      if (last_message > last_viewed) {
+        date = last_viewed;
+      }
+      getInitialChatMessages({ chatId, date });
+    }
+  };
+
   return (
-    <Accordion className={classes.container} style={containerInlineStyle}>
+    <Accordion
+      className={classes.container}
+      style={containerInlineStyle}
+      onChange={accordionExpandToggle}
+    >
       <AccordionSummary
         aria-label="Expand"
         aria-controls="additional-actions3-content"

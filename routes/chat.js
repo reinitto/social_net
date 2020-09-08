@@ -334,14 +334,15 @@ module.exports = function () {
           .limit(count)
           .populate("sender");
 
+        // reverse the order to have oldest message first
         messages = messages.reverse();
       }
 
-      // set directChat  last viewed to now.
+      // // set directChat  last viewed to now.
+      // either should be set here and loaded only on accordion open or should be its own route
       const viewDate = Date.now();
       await updateLastViewed({ conversationId, userId: _id, date: viewDate });
-      // reverse the order to have oldest message first
-      res.json({ messages });
+      res.json({ messages, userViewDate: viewDate });
     } catch (error) {
       console.log(error);
       res.status(400).send({ error: "getting messges failed" });

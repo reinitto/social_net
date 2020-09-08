@@ -25,7 +25,7 @@ export function ChatsNavigation() {
     closeChat,
     messageRoom,
     directConversations,
-    updateConversationMessages,
+    getInitialChatMessages,
   } = useConversations();
   const classes = useChatNavigationStyles();
   // chats ids have to be checked, if a really long one its dm otherwise group
@@ -45,7 +45,7 @@ export function ChatsNavigation() {
           chatId={chat.conversationId}
           messageRoom={messageRoom}
           messages={chat.messages}
-          updateConversationMessages={updateConversationMessages}
+          getInitialChatMessages={getInitialChatMessages}
         />
       ))}
     </div>

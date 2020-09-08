@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button, makeStyles } from "@material-ui/core";
 import { UserAvatarAndName } from "../Friends/UserAvatarAndName";
 import { useUser } from "../../context/user";
@@ -18,27 +18,26 @@ const useContactItemStyles = makeStyles((theme) => ({
 
 export function ContactsItem({ contact }) {
   const classes = useContactItemStyles();
-  const { openChat } = useConversations();
+  const { openChat, hasNewMessages } = useConversations();
   const { user } = useUser();
+  const [chatId] = useState(calculateDmId(user.id, contact._id));
+  const [newMessages, setNewMessages] = useState(false);
+
+  useEffect(() => {
+    setNewMessages(hasNewMessages(chatId));
+  });
   //Onclick opens conversation
   const addConversation = () => {
-    let chatId = calculateDmId(user.id, contact._id);
     openChat(chatId);
-    //check conversation tab
-    //if conversation id is in tab, open it
-    // else
-    //get conversation
-    //add to conversation tab
-    // open and focus
-    console.log("chat added", chatId);
   };
+  console.log("newMessages", newMessages);
   return (
     <Button onClick={addConversation} className={classes.contactItemContainer}>
       <UserAvatarAndName
         {...contact}
         containerClassNames={classes.avatarContainer}
       />
-      <div>status</div>
+      <div>{newMessages ? "new messages" : "no"}</div>
     </Button>
   );
 }

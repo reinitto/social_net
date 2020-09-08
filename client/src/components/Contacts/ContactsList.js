@@ -1,6 +1,6 @@
 import React, { Fragment } from "react";
 import { ContactsItem } from "./ContactsItem";
-export function ContactsList({ contacts, addChat }) {
+export function ContactsList({ contacts }) {
   if (contacts && contacts.length > 0) {
     return (
       <Fragment>
