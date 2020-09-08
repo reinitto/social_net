@@ -11,6 +11,7 @@ import submitDM from "../components/utils/message/submitDM";
 import getChatMessages from "../components/utils/message/getChatMessages";
 const ConversationsContext = createContext();
 export default function ConversationsProvider({ children }) {
+  const { userId, user } = useUser();
   const [socket, setSocket] = useState(null);
   const [socketId, setSocketId] = useState(null);
   const [directConversations, setDirectConversations] = useState([]);
@@ -20,7 +21,6 @@ export default function ConversationsProvider({ children }) {
     directConversationsRef.current = directConversations;
   });
   // const [groupConversations, setGroupConversations] = useState([]);
-  const { userId, user } = useUser();
   const addMessageToConversation = (data) => {
     const newConvos = directConversationsRef.current.map((convo) => {
       if (convo.conversationId === data.room) {
@@ -49,7 +49,7 @@ export default function ConversationsProvider({ children }) {
       }
     };
 
-    if (userId && !socket) {
+    if (userId) {
       let socket = socketIOClient("/", {
         query: { userId },
       });
@@ -61,13 +61,17 @@ export default function ConversationsProvider({ children }) {
       socket.on("chat", addMessageToConversation);
     }
     return () => {
-      if (socket) {
+      if (userId) {
         setLocalStorageConversations();
-        socket.off("chat");
-        socket.disconnect();
+        setDirectConversations([]);
+        directConversationsRef.current = null;
+        if (socket) {
+          socket.off("chat");
+          socket.disconnect();
+        }
       }
     };
-  }, [userId, socket]);
+  }, [userId]);
 
   useEffect(() => {
     let isRendered = true;
@@ -170,6 +174,9 @@ export default function ConversationsProvider({ children }) {
       console.log(error);
     }
   };
+  // console.log("directConversations ", directConversations);
+  console.log("userId", userId);
+  console.log("directConversations length", directConversations.length);
   return (
     <ConversationsContext.Provider
       value={{

@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme) => {
 
 function Navbar() {
   const classes = useStyles();
-  const { user, setUser } = useUser();
+  const { user, setUser, logoutUser } = useUser();
   let anchorEl = useRef(null);
   const [open, setOpen] = useState(false);
 
@@ -50,7 +50,7 @@ function Navbar() {
   const logout = async () => {
     const url = "/api/auth/logout";
     await fetch(url);
-    setUser(null);
+    logoutUser();
   };
 
   return (

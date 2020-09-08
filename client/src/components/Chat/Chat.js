@@ -32,6 +32,12 @@ const useChatStyles = makeStyles((theme) => ({
   },
 }));
 
+const defaultReceiver = {
+  username: "",
+  first_name: "",
+  last_name: "",
+  profile_photo: "",
+};
 function Chat({
   chat,
   closeChat,
@@ -43,12 +49,7 @@ function Chat({
   const [message, setMessage] = useState("");
   const classes = useChatStyles();
   const { user } = useUser();
-  const [receiver, setReceiver] = useState({
-    username: "",
-    first_name: "",
-    last_name: "",
-    profile_photo: "",
-  });
+  const [receiver, setReceiver] = useState(defaultReceiver);
   const onMessageChange = (text) => {
     setMessage(text);
   };
@@ -94,7 +95,10 @@ function Chat({
     if (chatId) {
       getReceiverInfo();
     }
-    return () => (isRendered = false);
+    return () => {
+      setReceiver(defaultReceiver);
+      isRendered = false;
+    };
   }, [chatId, user.id]);
   const removeChat = (e) => {
     e.stopPropagation();

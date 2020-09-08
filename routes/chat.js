@@ -330,13 +330,17 @@ module.exports = function () {
           },
           "sender content created _id"
         )
-          .limit(count)
           .sort("-created")
+          .limit(count)
           .populate("sender");
+
+        messages = messages.reverse();
       }
+
       // set directChat  last viewed to now.
       const viewDate = Date.now();
       await updateLastViewed({ conversationId, userId: _id, date: viewDate });
+      // reverse the order to have oldest message first
       res.json({ messages });
     } catch (error) {
       console.log(error);

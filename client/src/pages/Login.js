@@ -34,11 +34,10 @@ const useStyles = makeStyles((theme) => ({
 
 export default function SignIn() {
   const classes = useStyles();
-  const [loggedIn, setLoggedIn] = useState(false);
   const [email, setEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [password, setPassword] = useState("");
-  const { setUser } = useUser();
+  const { loginUser } = useUser();
   const changeEmail = (e) => {
     e.preventDefault();
     setEmail(e.target.value);
@@ -51,39 +50,8 @@ export default function SignIn() {
   const login = async (e) => {
     e.preventDefault();
     setErrorMessage("");
-    const url = "/api/auth/login";
-    let res = await fetch(url, {
-      method: "post",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
-    console.log("res.status", res.status);
-    if (res.status === 401) {
-      setErrorMessage("Login failed!");
-      return;
-    }
-    try {
-      let data = await res.json();
-      let { error, user } = data;
-      console.log("data", data);
-      if (error) {
-        setErrorMessage(error);
-      }
-      if (user) {
-        //  set user
-        setUser(user);
-        setLoggedIn(true);
-      }
-    } catch (err) {
-      console.log(err);
-    }
+    await loginUser({ email, password });
   };
-
-  if (loggedIn) {
-    return <Redirect to="/" />;
-  }
 
   return (
     <Container component="main" maxWidth="xs">
