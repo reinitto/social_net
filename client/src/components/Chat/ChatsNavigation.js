@@ -9,13 +9,14 @@ const useChatNavigationStyles = makeStyles((theme) => ({
     bottom: 0,
     left: 0,
     right: 275,
-    display: "flex",
   },
   hidden: {
     height: 0,
+    overflow: "hidden",
   },
   visible: {
-    height: "auto",
+    height: 75,
+    overflowY: "visible",
   },
 }));
 
@@ -35,8 +36,9 @@ export function ChatsNavigation() {
         openChats.length > 0 ? `${classes.visible}` : `${classes.hidden}`
       }`}
     >
-      {openChats.map((chat) => (
+      {openChats.map((chat, i) => (
         <Chat
+          i={i}
           key={chat.conversationId}
           chat={chat}
           closeChat={closeChat}

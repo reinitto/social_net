@@ -13,24 +13,38 @@ import getUserById from "../utils/users/getUsersById";
 import TextInputBox from "../TextInputBox";
 import UserAvatarAndName from "../Friends/UserAvatarAndName";
 
-const useChatStyles = makeStyles((theme) => ({
-  container: {
-    width: 250,
-  },
-  header: {
-    height: 75,
-  },
-  messagesList: {
-    height: 350,
-  },
-  input: {
-    margin: 8,
-    display: "flex",
-  },
-  submitButton: {
-    margin: "10px 5px ",
-  },
-}));
+const containerInlineStyle = {
+  margin: 0,
+};
+
+const useChatStyles = (itemCount) => {
+  let style = makeStyles((theme) => {
+    return {
+      container: {
+        width: 250,
+        height: "auto",
+        overflow: "visible",
+        position: "absolute",
+        bottom: 0,
+        left: 250 * itemCount,
+      },
+      header: {
+        height: 75,
+      },
+      messagesList: {
+        height: 350,
+      },
+      input: {
+        margin: 8,
+        display: "flex",
+      },
+      submitButton: {
+        margin: "10px 5px ",
+      },
+    };
+  });
+  return style();
+};
 
 const defaultReceiver = {
   username: "",
@@ -45,9 +59,10 @@ function Chat({
   messageRoom,
   messages,
   updateConversationMessages,
+  i,
 }) {
   const [message, setMessage] = useState("");
-  const classes = useChatStyles();
+  const classes = useChatStyles(i);
   const { user } = useUser();
   const [receiver, setReceiver] = useState(defaultReceiver);
   const onMessageChange = (text) => {
@@ -77,6 +92,7 @@ function Chat({
     }
     updateConversationMessages({ chatId, date });
     // get last 10 otherwise
+    //eslint-disable-next-line
   }, []);
 
   useEffect(() => {
@@ -103,7 +119,7 @@ function Chat({
     closeChat(chatId);
   };
   return (
-    <Accordion className={classes.container}>
+    <Accordion className={classes.container} style={containerInlineStyle}>
       <AccordionSummary
         aria-label="Expand"
         aria-controls="additional-actions3-content"
@@ -124,7 +140,7 @@ function Chat({
             type: "text",
             text: message.content,
             date: new Date(message.created),
-            position: message.sender._id == user.id ? "right" : "left",
+            position: message.sender._id === user.id ? "right" : "left",
           };
         })}
       />
