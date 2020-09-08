@@ -3,6 +3,7 @@ const UserContext = createContext();
 
 export default function UserProvider({ children }) {
   const [user, setUser] = useState(undefined);
+  const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState("");
   useEffect(() => {
     const getUser = async () => {
@@ -13,13 +14,12 @@ export default function UserProvider({ children }) {
         setUser(user);
         setUserId(user.id);
       }
+      setLoading(false);
     };
-    if (user === undefined) {
-      getUser();
-    }
-  }, [user]);
+    getUser();
+  }, []);
   return (
-    <UserContext.Provider value={{ user, setUser, userId }}>
+    <UserContext.Provider value={{ user, setUser, userId, loading }}>
       {children}
     </UserContext.Provider>
   );

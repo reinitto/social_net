@@ -99,7 +99,9 @@ export default function ConversationsProvider({ children }) {
         console.log(error);
       }
     };
-    getDms();
+    if (userId) {
+      getDms();
+    }
 
     return () => {
       isRendered = false;
