@@ -57,6 +57,7 @@ const useCommentInputStyles = makeStyles((theme) => ({
 export function TextInputBox({
   onChangeText = () => null,
   onSubmit = () => null,
+  onInputFocus = () => null,
   inputPlaceholder = "",
   submitButtonText = "Submit",
   text = "",
@@ -109,6 +110,7 @@ export function TextInputBox({
             multiline
             value={text}
             onChange={(e) => onChangeText(e.target.value)}
+            onFocus={onInputFocus || null}
           />
         </div>
         {children}

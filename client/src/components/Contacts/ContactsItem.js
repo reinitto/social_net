@@ -19,8 +19,8 @@ const useContactItemStyles = makeStyles((theme) => ({
 export function ContactsItem({ contact }) {
   const classes = useContactItemStyles();
   const { openChat, hasNewMessages } = useConversations();
-  const { user } = useUser();
-  const [chatId] = useState(calculateDmId(user.id, contact._id));
+  const { userId } = useUser();
+  const [chatId] = useState(calculateDmId(userId, contact._id));
   const [newMessages, setNewMessages] = useState(false);
 
   useEffect(() => {
@@ -30,7 +30,6 @@ export function ContactsItem({ contact }) {
   const addConversation = () => {
     openChat(chatId);
   };
-  console.log("newMessages", newMessages);
   return (
     <Button onClick={addConversation} className={classes.contactItemContainer}>
       <UserAvatarAndName

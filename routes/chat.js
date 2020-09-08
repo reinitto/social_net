@@ -349,6 +349,22 @@ module.exports = function () {
     }
   });
 
+  router.post("/direct/last_viewed", async (req, res) => {
+    if (!req.body || !req.body.conversationId || !req.body.viewDate) {
+      res.status(422).json({ error: "Missing required parameters" });
+      return;
+    }
+    try {
+      const { _id } = req.user;
+      const { conversationId, viewDate } = req.body;
+      await updateLastViewed({ conversationId, userId: _id, date: viewDate });
+      res.json({ status: "ok" });
+    } catch (error) {
+      console.log(error);
+      res.status(400).send({ error: "Updating view time failed" });
+    }
+  });
+
   // get user directConversations
   router.get("/direct/all", async (req, res) => {
     try {

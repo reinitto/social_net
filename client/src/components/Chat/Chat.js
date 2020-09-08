@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "react-chat-elements/dist/main.css";
 import {
   Accordion,
@@ -59,12 +59,14 @@ function Chat({
   messageRoom,
   messages,
   getInitialChatMessages,
+  setLastViewed,
   i,
 }) {
   const [message, setMessage] = useState("");
   const classes = useChatStyles(i);
   const { user } = useUser();
   const [receiver, setReceiver] = useState(defaultReceiver);
+  const inputRef = useRef(null);
   const onMessageChange = (text) => {
     setMessage(text);
   };
@@ -98,6 +100,11 @@ function Chat({
   const removeChat = (e) => {
     e.stopPropagation();
     closeChat(chatId);
+  };
+
+  const onInputFocus = () => {
+    console.log("input focused");
+    setLastViewed({ conversationId: chatId });
   };
 
   const accordionExpandToggle = (e, expanded) => {
@@ -153,8 +160,10 @@ function Chat({
         onSubmit={onMessageSubmit}
         text={message}
         submitButtonText="Send"
+        commentInputRef={inputRef}
         InputContainerClasses={classes.input}
         submitButtonClasses={classes.submitButton}
+        onInputFocus={onInputFocus}
       />
     </Accordion>
   );

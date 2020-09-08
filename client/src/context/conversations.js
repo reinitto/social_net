@@ -8,6 +8,7 @@ import React, {
 import socketIOClient from "socket.io-client";
 import { useUser } from "./user";
 import submitDM from "../components/utils/message/submitDM";
+import updateLastViewTime from "../components/utils/message/updateLastViewTime";
 import getChatMessages from "../components/utils/message/getChatMessages";
 const ConversationsContext = createContext();
 export default function ConversationsProvider({ children }) {
@@ -233,6 +234,23 @@ export default function ConversationsProvider({ children }) {
       return false;
     }
   };
+  const setLastViewed = ({ conversationId }) => {
+    let convos = directConversationsRef.current.map((con) => {
+      if (con.conversationId === conversationId) {
+        let user = con.participants.find(
+          (participant) => participant.user === userId
+        );
+        const viewDate = Date.now();
+        user.last_viewed = viewDate;
+        // TODO: update last viewed serverSide
+        updateLastViewTime({ conversationId, viewDate });
+        return con;
+      } else {
+        return con;
+      }
+    });
+    setDirectConversations(convos);
+  };
 
   return (
     <ConversationsContext.Provider
@@ -244,6 +262,7 @@ export default function ConversationsProvider({ children }) {
         getInitialChatMessages,
         disconnectSocket,
         hasNewMessages,
+        setLastViewed,
       }}
     >
       {children}
