@@ -22,6 +22,7 @@ export default function ConversationsProvider({ children }) {
   });
   // const [groupConversations, setGroupConversations] = useState([]);
   const addMessageToConversation = (data) => {
+    console.log("addMessageToConversation fired", data);
     const newConvos = directConversationsRef.current.map((convo) => {
       if (convo.conversationId === data.room) {
         const { content, sender, created } = data;
@@ -32,6 +33,15 @@ export default function ConversationsProvider({ children }) {
       }
     });
     setDirectConversations(newConvos);
+  };
+
+  const disconnectSocket = () => {
+    try {
+      socket.off("chat");
+      socket.disconnect();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
@@ -65,10 +75,6 @@ export default function ConversationsProvider({ children }) {
         setLocalStorageConversations();
         setDirectConversations([]);
         directConversationsRef.current = null;
-        if (socket) {
-          socket.off("chat");
-          socket.disconnect();
-        }
       }
     };
   }, [userId]);
@@ -113,6 +119,7 @@ export default function ConversationsProvider({ children }) {
   }, [userId]);
 
   const directMessage = async ({ message, receiverId }) => {
+    console.log("directMessage fired");
     await submitDM({ text: message, receiverId });
   };
 
@@ -174,9 +181,6 @@ export default function ConversationsProvider({ children }) {
       console.log(error);
     }
   };
-  // console.log("directConversations ", directConversations);
-  console.log("userId", userId);
-  console.log("directConversations length", directConversations.length);
   return (
     <ConversationsContext.Provider
       value={{
@@ -185,6 +189,7 @@ export default function ConversationsProvider({ children }) {
         messageRoom: directMessage,
         directConversations,
         updateConversationMessages,
+        disconnectSocket,
       }}
     >
       {children}

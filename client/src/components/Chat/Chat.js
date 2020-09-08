@@ -56,6 +56,7 @@ function Chat({
   const onMessageSubmit = async () => {
     let receiverId = chatId.replace(user.id, "");
     //submit message
+    console.log("onMessageSubmit clicked");
     await messageRoom({ room: chatId, message, receiverId });
 
     setMessage("");
@@ -72,9 +73,6 @@ function Chat({
       }
     });
     if (last_message > last_viewed) {
-      console.log("new messages");
-      console.log("last_message", last_message);
-      console.log("last_viewed", last_viewed);
       date = last_viewed;
     }
     updateConversationMessages({ chatId, date });
@@ -126,7 +124,7 @@ function Chat({
             type: "text",
             text: message.content,
             date: new Date(message.created),
-            position: message.sender.id == user.id ? "right" : "left",
+            position: message.sender._id == user.id ? "right" : "left",
           };
         })}
       />

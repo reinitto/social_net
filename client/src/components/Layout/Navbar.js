@@ -15,6 +15,7 @@ import {
 } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { useUser } from "../../context/user";
+import { useConversations } from "../../context/conversations";
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -36,6 +37,7 @@ const useStyles = makeStyles((theme) => {
 function Navbar() {
   const classes = useStyles();
   const { user, setUser, logoutUser } = useUser();
+  const { disconnectSocket } = useConversations();
   let anchorEl = useRef(null);
   const [open, setOpen] = useState(false);
 
@@ -51,6 +53,7 @@ function Navbar() {
     const url = "/api/auth/logout";
     await fetch(url);
     logoutUser();
+    disconnectSocket();
   };
 
   return (

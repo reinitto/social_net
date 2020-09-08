@@ -282,7 +282,7 @@ module.exports = function () {
 
       io.to(conversationId).emit("chat", {
         content: message,
-        sender: { username, first_name, last_name, profile_photo, id },
+        sender: { username, first_name, last_name, profile_photo, _id: id },
         room: conversationId,
         created: creationDate,
       });
