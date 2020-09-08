@@ -170,7 +170,6 @@ export default function ConversationsProvider({ children }) {
       console.log(error);
     }
   };
-
   return (
     <ConversationsContext.Provider
       value={{

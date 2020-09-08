@@ -63,7 +63,7 @@ function Chat({
   useEffect(() => {
     // get new messages if they exist
     const { last_message, participants } = chat;
-    let last_viewed = Date.now();
+    let last_viewed = null;
     let date = null;
     participants.forEach((participant) => {
       if (participant.user === user.id) {
@@ -72,6 +72,8 @@ function Chat({
     });
     if (last_message > last_viewed) {
       console.log("new messages");
+      console.log("last_message", last_message);
+      console.log("last_viewed", last_viewed);
       date = last_viewed;
     }
     updateConversationMessages({ chatId, date });

@@ -33,7 +33,7 @@ const isAdmin = async ({ userId, conversationId }) => {
   }
 };
 
-const updateLastViewed = async ({ conversationId, userId }) => {
+const updateLastViewed = async ({ conversationId, userId, date }) => {
   try {
     await DirectConversation.findOneAndUpdate(
       {
@@ -41,7 +41,7 @@ const updateLastViewed = async ({ conversationId, userId }) => {
         "participants.user": userId,
       },
       {
-        $set: { "participants.$.last_viewed": Date.now() },
+        $set: { "participants.$.last_viewed": date },
       }
     );
     return { ok: true };
@@ -50,13 +50,13 @@ const updateLastViewed = async ({ conversationId, userId }) => {
   }
 };
 
-const updateLastMessage = async (conversationId) => {
+const updateLastMessage = async ({ conversationId, date }) => {
   try {
     await DirectConversation.findOneAndUpdate(
       { conversationId },
       {
         $set: {
-          last_message: Date.now(),
+          last_message: date,
         },
       }
     );
@@ -271,10 +271,12 @@ module.exports = function () {
       const { message, receiverId } = req.body;
       const { username, first_name, last_name, profile_photo, id } = req.user;
       const conversationId = direct_conversationId(id, receiverId);
+      const creationDate = Date.now();
       let newDirectMessage = new DirectMessage({
         direct_conversationId: conversationId,
         sender: id,
         content: message,
+        created: creationDate,
       });
       const io = req.app.get("socketio");
 
@@ -282,13 +284,17 @@ module.exports = function () {
         content: message,
         sender: { username, first_name, last_name, profile_photo, id },
         room: conversationId,
-        created: Date.now(),
+        created: creationDate,
       });
 
       await newDirectMessage.save();
       // set directChat  last viewed to now
-      await updateLastViewed({ conversationId, userId: id });
-      await updateLastMessage(conversationId);
+      await updateLastViewed({
+        conversationId,
+        userId: id,
+        date: creationDate,
+      });
+      await updateLastMessage({ conversationId, date: creationDate });
 
       res.json({ message: "message added" });
     } catch (error) {
@@ -329,7 +335,8 @@ module.exports = function () {
           .populate("sender");
       }
       // set directChat  last viewed to now.
-      await updateLastViewed({ conversationId, userId: _id });
+      const viewDate = Date.now();
+      await updateLastViewed({ conversationId, userId: _id, date: viewDate });
       res.json({ messages });
     } catch (error) {
       console.log(error);
