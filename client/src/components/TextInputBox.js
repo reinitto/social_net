@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useState } from "react";
 import {
   Button,
   TextField,
@@ -57,7 +57,6 @@ const useCommentInputStyles = makeStyles((theme) => ({
 export function TextInputBox({
   onChangeText = () => null,
   onSubmit = () => null,
-  onInputFocus = () => null,
   inputPlaceholder = "",
   submitButtonText = "Submit",
   text = "",
@@ -67,10 +66,27 @@ export function TextInputBox({
   children,
   InputContainerClasses = "",
   submitButtonClasses = "",
+  inputProps = {},
 }) {
   const classes = useCommentInputStyles();
   const { user } = useUser();
-
+  const [addChar, setAddChar] = useState(true);
+  const onKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      let alphaNumRe = /[a-z0-9]+/gi;
+      if (text.match(alphaNumRe)) {
+        setAddChar(false);
+        onSubmit();
+      }
+    } else {
+      setAddChar(true);
+    }
+  };
+  const changeText = (e) => {
+    if (addChar) {
+      onChangeText(e.target.value);
+    }
+  };
   return (
     <Fragment>
       <Typography
@@ -99,7 +115,11 @@ export function TextInputBox({
             variant="circle"
           />
           <TextField
-            InputProps={{ className: classes.commentInputTextField }}
+            InputProps={{
+              ...inputProps,
+              className: classes.commentInputTextField,
+              onKeyDown,
+            }}
             InputLabelProps={{ className: classes.commentInputLabel }}
             className={classes.commentTextField}
             required
@@ -109,8 +129,7 @@ export function TextInputBox({
             label={inputPlaceholder}
             multiline
             value={text}
-            onChange={(e) => onChangeText(e.target.value)}
-            onFocus={onInputFocus || null}
+            onChange={changeText}
           />
         </div>
         {children}

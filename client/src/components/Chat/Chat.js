@@ -163,7 +163,7 @@ function Chat({
         commentInputRef={inputRef}
         InputContainerClasses={classes.input}
         submitButtonClasses={classes.submitButton}
-        onInputFocus={onInputFocus}
+        inputProps={{ onFocus: onInputFocus }}
       />
     </Accordion>
   );
