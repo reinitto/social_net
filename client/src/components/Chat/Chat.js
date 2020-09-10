@@ -7,7 +7,7 @@ import {
   makeStyles,
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
-import { MessageList } from "react-chat-elements";
+import { MessageList, MessageBox } from "react-chat-elements";
 import { useUser } from "../../context/user";
 import getUserById from "../utils/users/getUsersById";
 import TextInputBox from "../TextInputBox";
@@ -34,6 +34,15 @@ const useChatStyles = (itemCount) => {
       messagesList: {
         height: 350,
       },
+      myMessageItem: {
+        "&>div": {
+          backgroundColor: "#0083FE",
+          color: "white",
+          "&>svg": {
+            fill: "#0083FE",
+          },
+        },
+      },
       input: {
         margin: 8,
         display: "flex",
@@ -52,6 +61,12 @@ const defaultReceiver = {
   last_name: "",
   profile_photo: "",
 };
+
+const ChatItem = (props) => {
+  console.log("props", props);
+  return <MessageBox {...props} className="message-box-class" />;
+};
+
 function Chat({
   chat,
   closeChat,
@@ -144,14 +159,31 @@ function Chat({
       </AccordionSummary>
       <MessageList
         className={classes.messagesList}
-        lockable={false}
+        lockable={true}
         toBottomHeight={"100%"}
-        dataSource={messages.map((message) => {
+        dataSource={messages.map((message, i) => {
+          // return (
+          //   <ChatItem
+          //     key={i}
+          //     type="text"
+          //     text={message.content}
+          //     date={new Date(message.created)}
+          //     position={message.sender._id === user.id ? "right" : "left"}
+          //     style={{
+          //       color: "red",
+          //     }}
+          //   />
+          // );
           return {
             type: "text",
             text: message.content,
             date: new Date(message.created),
             position: message.sender._id === user.id ? "right" : "left",
+            style: {
+              color: "red",
+            },
+            className:
+              message.sender._id === user.id ? classes.myMessageItem : "",
           };
         })}
       />
