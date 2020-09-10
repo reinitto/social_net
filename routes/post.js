@@ -13,7 +13,7 @@ module.exports = function () {
         const newPost = new Post({
           body,
           image,
-          target,
+          target: target || null,
           creator: _id,
         });
         try {

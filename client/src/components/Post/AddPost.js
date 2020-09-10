@@ -38,7 +38,9 @@ function AddPost() {
 
   useEffect(() => {
     let userId = getUserIdFromLocation();
-    setTarget(userId);
+    if (userId && userId.length > 16) {
+      setTarget(userId);
+    }
   }, []);
 
   const onImageUpload = {
