@@ -1,10 +1,19 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  useCallback,
+} from "react";
+import socketIOClient from "socket.io-client";
 const UserContext = createContext();
 
 export default function UserProvider({ children }) {
   const [user, setUser] = useState(undefined);
   const [loading, setLoading] = useState(true);
+  const [socket, setSocket] = useState(null);
   const [userId, setUserId] = useState("");
+
   const getUser = async () => {
     const url = "/api/auth/me";
     const res = await fetch(url);
@@ -20,15 +29,23 @@ export default function UserProvider({ children }) {
   }, []);
 
   useEffect(() => {
+    const initSocket = async () => {
+      if (!socket) {
+        const ioSocket = await socketIOClient("/", {
+          query: { userId: user.id },
+        });
+        setSocket(ioSocket);
+      }
+    };
     if (userId) {
-      getUser();
+      initSocket();
     }
   }, [userId]);
 
-  const logoutUser = () => {
+  const logoutUser = useCallback(() => {
     setUser(undefined);
     setUserId("");
-  };
+  }, []);
 
   const loginUser = async ({ email, password }) => {
     const url = "/api/auth/login";
@@ -41,7 +58,7 @@ export default function UserProvider({ children }) {
     });
     try {
       let data = await res.json();
-      let { error, user } = data;
+      let { user } = data;
       if (user) {
         //  set user
         setUser(user);
@@ -51,10 +68,17 @@ export default function UserProvider({ children }) {
       console.log(err);
     }
   };
-
   return (
     <UserContext.Provider
-      value={{ user, setUser, userId, loading, logoutUser, loginUser }}
+      value={{
+        user,
+        setUser,
+        userId,
+        loading,
+        logoutUser,
+        loginUser,
+        socket,
+      }}
     >
       {children}
     </UserContext.Provider>

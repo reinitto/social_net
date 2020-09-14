@@ -14,7 +14,12 @@ export const getChatMessages = async ({ date, limit, skip, chatId }) => {
     body: JSON.stringify(payload),
   };
   const res = await fetch(url, options);
-  return await res.json();
+  try {
+    return await res.json();
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
 };
 
 export default getChatMessages;

@@ -5,7 +5,7 @@ import { useUser } from "../../context/user";
 
 const ProtectedRoute = ({ children, ...rest }) => {
   let { user } = useUser();
-  if (user === null) {
+  if (!user) {
     return <Redirect to="/login" />;
   }
   return (

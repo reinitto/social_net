@@ -1,5 +1,6 @@
 import React, { useEffect, useState, Fragment } from "react";
 import { useParams } from "react-router-dom";
+import { useUser } from "../context/user";
 import { getUserInfo } from "../components/utils/getUserInfo";
 import ProfileHeader from "../components/Profile/ProfileHeader";
 import ProfileNavigation from "../components/Profile/ProfileNavigation";
@@ -21,15 +22,21 @@ function Profile() {
   const [profile, setProfile] = useState(undefined);
   const [message, setMessage] = useState("");
   const profileId = useParams().profileId;
+  const { logoutUser } = useUser();
   useEffect(() => {
     let isRendered = true;
     const updateProfile = async () => {
-      const user = await getUserInfo(profileId);
-      if (isRendered) {
-        if (user) {
-          setProfile(user);
-        } else {
-          setMessage("profile not found");
+      const res = await getUserInfo(profileId);
+      if (res.notAuthenticated) {
+        logoutUser();
+      } else {
+        const { user } = res;
+        if (isRendered) {
+          if (user) {
+            setProfile(user);
+          } else {
+            setMessage("profile not found");
+          }
         }
       }
     };

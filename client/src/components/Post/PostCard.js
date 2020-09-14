@@ -53,37 +53,34 @@ const PostTitle = ({
   const [targetInfo, setTargetInfo] = useState(null);
   useEffect(() => {
     let isRendered = true;
-    const updateTargetInfo = async () => {
-      const targetUserInfo = await getUserInfo(target_id);
+    const updateTargetInfo = async (target_id) => {
+      const { user: targetUserInfo } = await getUserInfo(target_id);
       if (isRendered) {
         setTargetInfo(targetUserInfo);
       }
     };
     if (target_id) {
-      updateTargetInfo();
+      updateTargetInfo(target_id);
     }
     return () => (isRendered = false);
   }, [target_id]);
   let authorName =
     first_name || last_name ? `${first_name}${last_name}` : `${username}`;
-  return authorName ? (
+  let targetName = targetInfo
+    ? targetInfo.first_name || targetInfo.last_name
+      ? `${targetInfo.first_name} ${targetInfo.last_name}`
+      : `${targetInfo.username}`
+    : null;
+  return author_id ? (
     <div className={classes.postAuthorContainer}>
       <Link to={`/profile/${author_id}`} className={classes.postAuthor}>
-        <Typography display="inline">
-          {first_name || last_name
-            ? `${first_name} ${last_name}`
-            : `${username}`}
-        </Typography>
+        <Typography display="inline">{authorName}</Typography>
       </Link>
       {targetInfo ? (
         <Fragment>
           <ArrowRightIcon />{" "}
           <Link to={`/profile/${target_id}`} className={classes.postAuthor}>
-            <Typography display="inline">
-              {targetInfo.first_name || targetInfo.last_name
-                ? `${targetInfo.first_name} ${targetInfo.last_name}`
-                : `${targetInfo.username}`}
-            </Typography>
+            <Typography display="inline">{targetName}</Typography>
           </Link>
         </Fragment>
       ) : null}
@@ -165,7 +162,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function PostCard({ post }) {
   const classes = useStyles();
-  const { user } = useUser();
+  const { user, logoutUser } = useUser();
   const [like, setLike] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [showComments, setShowComments] = useState(false);
@@ -181,13 +178,20 @@ export default function PostCard({ post }) {
   useEffect(() => {
     let isRendered = true;
     const getPostCreatorInfo = async (id) => {
-      const user = await getUserInfo(id);
-      user.profile_photo = user.profile_photo.replace(
-        "upload",
-        "upload/w_1000,h_1000,c_crop,g_face/w_100"
-      );
-      if (isRendered) {
-        setAuthorInfo(user);
+      const res = await getUserInfo(id);
+      if (res.notAuthenticated) {
+        logoutUser();
+      } else {
+        const { user } = res;
+        if (user) {
+          user.profile_photo = user.profile_photo.replace(
+            "upload",
+            "upload/w_1000,h_1000,c_crop,g_face/w_100"
+          );
+        }
+        if (isRendered) {
+          setAuthorInfo(user);
+        }
       }
     };
     if (likedBy) {
@@ -199,7 +203,11 @@ export default function PostCard({ post }) {
       setLikeCount(0);
     }
     if (creator) {
-      getPostCreatorInfo(creator);
+      try {
+        getPostCreatorInfo(creator);
+      } catch (error) {
+        console.log(error);
+      }
     }
     return () => (isRendered = false);
   }, [user, likedBy, creator]);
@@ -259,6 +267,7 @@ export default function PostCard({ post }) {
     await fetch(url.href, options);
   };
   const { profile_photo, first_name, last_name, username, _id } = authorInfo;
+
   return (
     <Card className={classes.root}>
       <CardHeader

@@ -3,10 +3,9 @@ export const getUserInfo = async (id) => {
     if (id) {
       const url = new URL(window.location.origin + `/api/user/${id}`);
       const authorInfo = await fetch(url.href);
-      const { user } = await authorInfo.json();
-      return user;
+      return authorInfo.json();
     }
   } catch (error) {
-    return { error };
+    console.log("getUSerInfo failed", error);
   }
 };

@@ -310,6 +310,7 @@ module.exports = function () {
       return;
     }
     try {
+      console.log("getting chat messages");
       let { chatId, count = 10, date } = req.body;
       const { _id } = req.user;
       chatId = chatId.replace(_id, "");

@@ -52,12 +52,19 @@ export function ContactsItem({ contact }) {
   const classes = useContactItemStyles();
   const { openChat, hasNewMessages } = useConversations();
   const { userId } = useUser();
-  const [chatId] = useState(calculateDmId(userId, contact._id));
+  const [chatId, setChatId] = useState(null);
   const [newMessages, setNewMessages] = useState(false);
   const chatIconClasses = useChatIconStyle(newMessages);
-  console.log(chatIconClasses);
+  const contactId = contact._id;
   useEffect(() => {
-    setNewMessages(hasNewMessages(chatId));
+    if (userId && contactId) {
+      setChatId(calculateDmId(userId, contactId));
+    }
+  }, [userId, contactId]);
+  useEffect(() => {
+    if (chatId) {
+      setNewMessages(hasNewMessages(chatId));
+    }
   });
   //Onclick opens conversation
   const addConversation = () => {
@@ -74,7 +81,6 @@ export function ContactsItem({ contact }) {
       <Tooltip title={newMessages ? "New messages" : "No new Messages"}>
         <Button onClick={addConversation} className={classes.chatButton}>
           <ChatIcon className={chatIconClasses.chatIcon} />
-          {/* <div>{newMessages ? "new messages" : "no"}</div> */}
         </Button>
       </Tooltip>
     </div>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, Fragment } from "react";
 import { makeStyles } from "@material-ui/core";
 import { getUserFeed } from "./utils/getUserFeed";
+import { useUser } from "../context/user";
 import PostCard from "./Post/PostCard";
 import AddPost from "./Post/AddPost";
 
@@ -15,12 +16,18 @@ const useNewsfeedStyles = makeStyles((theme) => ({
 function Newsfeed({ userId }) {
   const [posts, setPosts] = useState([]);
   const classes = useNewsfeedStyles();
+  const { logoutUser } = useUser();
   useEffect(() => {
     let isRendered = true;
     const getPosts = async () => {
-      const feed = await getUserFeed(userId);
-      if (isRendered) {
-        setPosts(feed);
+      const res = await getUserFeed(userId);
+      if (res.notAuthenticated) {
+        logoutUser();
+      } else {
+        const { feed } = res;
+        if (isRendered) {
+          setPosts(feed);
+        }
       }
     };
     if (userId) {

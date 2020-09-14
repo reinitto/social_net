@@ -2,10 +2,9 @@ export const getUserFeed = async (id) => {
   try {
     const url = new URL(window.location.origin + `/api/user/feed/${id}`);
     const userFeed = await fetch(url.href);
-    const { feed } = await userFeed.json();
-    return feed;
+    return await userFeed.json();
   } catch (error) {
-    console.log(error);
+    console.log("getUserFeed failed", error);
     return [];
   }
 };

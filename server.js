@@ -29,7 +29,7 @@ const isAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next();
   }
-  res.redirect("/login");
+  res.json({ notAuthenticated: true });
 };
 
 const sessionMiddleware = session({
@@ -38,11 +38,11 @@ const sessionMiddleware = session({
   saveUninitialized: false,
   cookie: {
     secure: false,
-    maxAge: 24 * 60 * 60 * 30,
+    maxAge: 24 * 60 * 30,
   },
   store: new MongoStore({
     mongooseConnection: mongoose.connection,
-    ttl: 24 * 60 * 60,
+    ttl: 24 * 60,
   }),
 });
 const PORT = process.env.PORT || 5000;

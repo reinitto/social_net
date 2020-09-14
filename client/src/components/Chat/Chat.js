@@ -7,7 +7,7 @@ import {
   makeStyles,
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
-import { MessageList, MessageBox } from "react-chat-elements";
+import { MessageList } from "react-chat-elements";
 import { useUser } from "../../context/user";
 import getUserById from "../utils/users/getUsersById";
 import TextInputBox from "../TextInputBox";
@@ -62,10 +62,10 @@ const defaultReceiver = {
   profile_photo: "",
 };
 
-const ChatItem = (props) => {
-  console.log("props", props);
-  return <MessageBox {...props} className="message-box-class" />;
-};
+// const ChatItem = (props) => {
+//   console.log("props", props);
+//   return <MessageBox {...props} className="message-box-class" />;
+// };
 
 function Chat({
   chat,
@@ -79,7 +79,7 @@ function Chat({
 }) {
   const [message, setMessage] = useState("");
   const classes = useChatStyles(i);
-  const { user } = useUser();
+  const { user, userId, logoutUser } = useUser();
   const [receiver, setReceiver] = useState(defaultReceiver);
   const inputRef = useRef(null);
   const onMessageChange = (text) => {
@@ -97,11 +97,16 @@ function Chat({
     // receiver info
     let isRendered = true;
     const getReceiverInfo = async () => {
-      let receiverId = chatId.replace(user.id, "");
-      const { users } = await getUserById([receiverId]);
-      const { username, first_name, last_name, profile_photo } = users[0];
-      if (isRendered) {
-        setReceiver({ username, first_name, last_name, profile_photo });
+      let receiverId = chatId.replace(userId, "");
+      const data = await getUserById([receiverId]);
+      if (data.notAuthenticated) {
+        logoutUser();
+      } else {
+        const { users } = data;
+        const { username, first_name, last_name, profile_photo } = users[0];
+        if (isRendered) {
+          setReceiver({ username, first_name, last_name, profile_photo });
+        }
       }
     };
     if (chatId) {
@@ -111,14 +116,13 @@ function Chat({
       setReceiver(defaultReceiver);
       isRendered = false;
     };
-  }, [chatId, user.id]);
+  }, [chatId, userId]);
   const removeChat = (e) => {
     e.stopPropagation();
     closeChat(chatId);
   };
 
   const onInputFocus = () => {
-    console.log("input focused");
     setLastViewed({ conversationId: chatId });
   };
 
@@ -162,18 +166,6 @@ function Chat({
         lockable={true}
         toBottomHeight={"100%"}
         dataSource={messages.map((message, i) => {
-          // return (
-          //   <ChatItem
-          //     key={i}
-          //     type="text"
-          //     text={message.content}
-          //     date={new Date(message.created)}
-          //     position={message.sender._id === user.id ? "right" : "left"}
-          //     style={{
-          //       color: "red",
-          //     }}
-          //   />
-          // );
           return {
             type: "text",
             text: message.content,

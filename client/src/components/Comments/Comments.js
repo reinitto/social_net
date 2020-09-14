@@ -151,7 +151,7 @@ function Comment({ comment, parentCommentId, postId }) {
   useEffect(() => {
     let isRendered = true;
     const getCommenterInfo = async (id) => {
-      const user = await getUserInfo(id);
+      const { user } = await getUserInfo(id);
       if (isRendered) {
         user.profile_photo = `${user.profile_photo}`.replace(
           "upload",

@@ -5,56 +5,18 @@ import React, {
   useEffect,
   useRef,
 } from "react";
-import socketIOClient from "socket.io-client";
 import { useUser } from "./user";
 import submitDM from "../components/utils/message/submitDM";
 import updateLastViewTime from "../components/utils/message/updateLastViewTime";
 import getChatMessages from "../components/utils/message/getChatMessages";
 const ConversationsContext = createContext();
 export default function ConversationsProvider({ children }) {
-  const { userId } = useUser();
-  const [socket, setSocket] = useState(null);
-  // const [socketId, setSocketId] = useState(null);
+  const { userId, logoutUser, socket } = useUser();
   const [directConversations, setDirectConversations] = useState([]);
   const directConversationsRef = useRef([]);
-
   useEffect(() => {
     directConversationsRef.current = directConversations;
   });
-  // adds socket message to conversation
-  // TODO : updates last message date
-  // and last message viewed by logged in user
-  // if received message is not from logged in user, update sender last viewed date
-  const addMessageToConversation = (data) => {
-    const newConvos = directConversationsRef.current.map((convo) => {
-      if (convo.conversationId === data.room) {
-        const { content, sender, created } = data;
-        // find participant by sender id
-        let newParticipants = convo.participants.map((participant) => {
-          if (participant.user === sender._id) {
-            if (sender._id === userId) {
-              participant.last_viewed = created;
-              return participant;
-            } else {
-              participant.last_viewed = created;
-              return participant;
-            }
-          } else {
-            return participant;
-          }
-        });
-        // set participant last viewed to now if its logged in user
-        // if its  other user use created date and update
-        convo.participants = newParticipants;
-        convo.messages.push({ content, sender, created });
-        convo.last_message = created;
-        return convo;
-      } else {
-        return convo;
-      }
-    });
-    setDirectConversations(newConvos);
-  };
 
   const disconnectSocket = () => {
     try {
@@ -79,18 +41,6 @@ export default function ConversationsProvider({ children }) {
         );
       }
     };
-
-    if (userId) {
-      let socket = socketIOClient("/", {
-        query: { userId },
-      });
-      setSocket(socket);
-
-      // socket.on("connect", () => {
-      //   setSocketId(socket.id);
-      // });
-      socket.on("chat", addMessageToConversation);
-    }
     return () => {
       if (userId) {
         setLocalStorageConversations();
@@ -98,7 +48,50 @@ export default function ConversationsProvider({ children }) {
         directConversationsRef.current = null;
       }
     };
-  }, [userId]);
+  }, [userId, logoutUser]);
+
+  useEffect(() => {
+    if (socket) {
+      // and last message viewed by logged in user
+      // if received message is not from logged in user, update sender last viewed date
+      const addMessageToConversation = (data) => {
+        const newConvos = directConversationsRef.current.map((convo) => {
+          if (convo.conversationId === data.room) {
+            const { content, sender, created } = data;
+            // find participant by sender id
+            let newParticipants = convo.participants.map((participant) => {
+              if (participant.user === sender._id) {
+                if (sender._id === userId) {
+                  participant.last_viewed = created;
+                  return participant;
+                } else {
+                  participant.last_viewed = created;
+                  return participant;
+                }
+              } else {
+                return participant;
+              }
+            });
+            // set participant last viewed to now if its logged in user
+            // if its  other user use created date and update
+            convo.participants = newParticipants;
+            convo.messages.push({ content, sender, created });
+            convo.last_message = created;
+            return convo;
+          } else {
+            return convo;
+          }
+        });
+        setDirectConversations(newConvos);
+      };
+      socket.on("chat", addMessageToConversation);
+    }
+    return () => {
+      if (socket) {
+        socket.off("chat");
+      }
+    };
+  }, [socket]);
 
   useEffect(() => {
     let isRendered = true;
@@ -114,17 +107,22 @@ export default function ConversationsProvider({ children }) {
       try {
         const url = "/api/chat/direct/all";
         const res = await fetch(url);
-        const { directConversations } = await res.json();
-        let newDms = await getConversationsFromLocalStorage({
-          userId,
-        });
-        let dmsWithOpenFlag = directConversations.map((dm) => ({
-          ...dm,
-          messages: [],
-          open: newDms.includes(dm.conversationId) ? true : false,
-        }));
-        if (isRendered) {
-          setDirectConversations(dmsWithOpenFlag);
+        const data = await res.json();
+        if (data.notAuthenticated) {
+          logoutUser();
+        } else {
+          const { directConversations } = data;
+          let newDms = await getConversationsFromLocalStorage({
+            userId,
+          });
+          let dmsWithOpenFlag = directConversations.map((dm) => ({
+            ...dm,
+            messages: [],
+            open: newDms.includes(dm.conversationId) ? true : false,
+          }));
+          if (isRendered) {
+            setDirectConversations(dmsWithOpenFlag);
+          }
         }
       } catch (error) {
         console.log(error);
@@ -137,7 +135,7 @@ export default function ConversationsProvider({ children }) {
     return () => {
       isRendered = false;
     };
-  }, [userId]);
+  }, [userId, logoutUser]);
   //sends message to server,saves in db and informs socketIO
   const directMessage = async ({ message, receiverId }) => {
     await submitDM({ text: message, receiverId });
@@ -190,23 +188,28 @@ export default function ConversationsProvider({ children }) {
   // is executed on Chat component init only
   const getInitialChatMessages = async ({ chatId, limit, date, skip }) => {
     try {
-      const { messages, userViewDate } = await getChatMessages({
+      const res = await getChatMessages({
         chatId,
         limit,
         date,
         skip,
       });
-      let dm = directConversationsRef.current.map((convo) => {
-        if (convo.conversationId === chatId) {
-          let user = convo.participants.find(
-            (participant) => participant.user === userId
-          );
-          convo.messages.push(...messages);
-          user.last_viewed = userViewDate;
-        }
-        return convo;
-      });
-      setDirectConversations(dm);
+      if (res.notAuthenticated) {
+        logoutUser();
+      } else {
+        const { messages, userViewDate } = res;
+        let dm = directConversationsRef.current.map((convo) => {
+          if (convo.conversationId === chatId) {
+            let user = convo.participants.find(
+              (participant) => participant.user === userId
+            );
+            convo.messages.push(...messages);
+            user.last_viewed = userViewDate;
+          }
+          return convo;
+        });
+        setDirectConversations(dm);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -230,7 +233,6 @@ export default function ConversationsProvider({ children }) {
         return false;
       }
     } else {
-      console.log("no user or dms not loaded yet");
       return false;
     }
   };
@@ -251,7 +253,6 @@ export default function ConversationsProvider({ children }) {
     });
     setDirectConversations(convos);
   };
-
   return (
     <ConversationsContext.Provider
       value={{
