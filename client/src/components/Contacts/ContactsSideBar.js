@@ -10,7 +10,6 @@ import {
   IconButton,
 } from "@material-ui/core";
 import { ContactsList } from "./ContactsList";
-import { useFriends } from "../../context/friends";
 
 const useDrawerStyles = makeStyles((theme) => ({
   root: {
@@ -51,8 +50,6 @@ export const OpenSidebar = ({ openSidebar }) => {
 
 export function ContactsSideBar() {
   const classes = useDrawerStyles();
-  const [contacts, setContacts] = useState([]);
-  const { friends } = useFriends();
   const [sidebar, setSidebar] = useState(false);
 
   const closeSidebar = () => {
@@ -61,11 +58,6 @@ export function ContactsSideBar() {
   const openSidebar = () => {
     setSidebar(true);
   };
-  useEffect(() => {
-    if (friends && friends.friends) {
-      setContacts(friends.friends);
-    }
-  }, [friends]);
 
   return (
     <div className={classes.root}>
@@ -79,9 +71,7 @@ export function ContactsSideBar() {
           </IconButton>
         </div>
         <Divider />
-        {contacts && contacts.length > 0 ? (
-          <ContactsList contacts={contacts} />
-        ) : null}
+        <ContactsList />
       </Drawer>
       <OpenSidebar openSidebar={openSidebar} />
     </div>

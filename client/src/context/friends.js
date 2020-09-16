@@ -19,9 +19,9 @@ export default function FriendsProvider({ children }) {
       const { friendLists } = await res.json();
       setFriends(friendLists);
     };
-    if (user && user.friends && user.friends.length > 0) {
-      getAllFriends(user.friends);
-    }
+    // if (user && user.friends && user.friends.length > 0) {
+    //   getAllFriends(user.friends);
+    // }
   }, [user]);
   return (
     <FriendsContext.Provider value={{ friends }}>

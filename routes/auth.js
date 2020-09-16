@@ -1,40 +1,79 @@
-module.exports = function (passport) {
-  const User = require("../models/User");
-  const express = require("express");
-  const { appName } = require("../client/src/constants.js");
-  const router = express.Router();
+const User = require("../models/User");
+const Friends = require("../models/Friends");
+const express = require("express");
+const { appName } = require("../client/src/constants.js");
+const router = express.Router();
 
-  const mailjet = require("node-mailjet").connect(
-    process.env.MAILJET_API,
-    process.env.MAILJET_SECRET
-  );
-  const sendRegistrationEmail = async ({ username, email }) => {
-    try {
-      const request = await mailjet.post("send", { version: "v3.1" }).request({
-        Messages: [
-          {
-            From: {
-              Email: "reinitto@gmail.com",
-              Name: "Labais",
-            },
-            To: [
-              {
-                Email: email,
-                Name: username,
-              },
-            ],
-            Subject: `Greetings from Social-Newtork App, ${username} `,
-            TextPart: "You just registered on the app with this email",
-            HTMLPart: `<h3>Dear ${username}, welcome to <a href='https://www.mailjet.com/'>${appName}</a>!</h3><br />`,
-            CustomID: "AppGettingStartedTest",
+const mailjet = require("node-mailjet").connect(
+  process.env.MAILJET_API,
+  process.env.MAILJET_SECRET
+);
+const getUserFriends = async (friendshipIds) => {
+  const friendships = await Friends.find({
+    _id: { $in: friendshipIds },
+  }).populate({
+    path: "recipient",
+    model: "User",
+  });
+  return friendships;
+};
+const sendRegistrationEmail = async ({ username, email }) => {
+  try {
+    const request = await mailjet.post("send", { version: "v3.1" }).request({
+      Messages: [
+        {
+          From: {
+            Email: "reinitto@gmail.com",
+            Name: "Labais",
           },
-        ],
-      });
-    } catch (err) {
-      console.log("email err", err);
-    }
+          To: [
+            {
+              Email: email,
+              Name: username,
+            },
+          ],
+          Subject: `Greetings from Social-Newtork App, ${username} `,
+          TextPart: "You just registered on the app with this email",
+          HTMLPart: `<h3>Dear ${username}, welcome to <a href='https://www.mailjet.com/'>${appName}</a>!</h3><br />`,
+          CustomID: "AppGettingStartedTest",
+        },
+      ],
+    });
+  } catch (err) {
+    console.log("email err", err);
+  }
+};
+// Destructures user from req.user object
+const destructureUser = async (userObj) => {
+  const {
+    email = "",
+    username = "",
+    social_profiles = { facebook: "", instagram: "", twitter: "" },
+    first_name = "",
+    last_name = "",
+    bio = "",
+    cover_photo = "",
+    profile_photo = "",
+    id = "",
+    friends = [],
+  } = userObj;
+  const friendshipIds = friends.map((friend) => friend._id);
+  const friendships = await getUserFriends(friendshipIds);
+  return {
+    email,
+    username,
+    social_profiles,
+    first_name,
+    last_name,
+    bio,
+    cover_photo,
+    profile_photo,
+    id,
+    friends: friendships,
   };
+};
 
+module.exports = function (passport) {
   router.post("/register", async (req, res) => {
     let { username, email, password } = req.body;
     let alreadyExists = await User.findOne({ email });
@@ -49,28 +88,10 @@ module.exports = function (passport) {
       try {
         await user.save();
         passport.authenticate("local")(req, res, async () => {
-          const {
-            email,
-            username,
-            social_profiles,
-            first_name,
-            last_name,
-            bio,
-            cover_photo,
-            profile_photo,
-          } = req.user;
           await sendRegistrationEmail({ email, username });
+          const user = await destructureUser(req.user);
           res.json({
-            user: {
-              email,
-              username,
-              social_profiles,
-              first_name,
-              last_name,
-              bio,
-              cover_photo,
-              profile_photo,
-            },
+            user,
           });
         });
       } catch (err) {
@@ -80,68 +101,23 @@ module.exports = function (passport) {
     }
   });
 
-  router.post("/login", passport.authenticate("local"), (req, res) => {
+  router.post("/login", passport.authenticate("local"), async (req, res) => {
     if (!req.user) {
       res.json({ user: null, error: "User not found" });
     }
-    const {
-      email,
-      username,
-      social_profiles,
-      first_name,
-      last_name,
-      bio,
-      cover_photo,
-      profile_photo,
-      id,
-      friends,
-    } = req.user;
-    // calculate dm room ids
-    const roomIds = res.json({
-      user: {
-        email,
-        username,
-        social_profiles,
-        first_name,
-        last_name,
-        bio,
-        cover_photo,
-        profile_photo,
-        id,
-        friends,
-      },
+    const user = await destructureUser(req.user);
+    res.json({
+      user,
     });
   });
 
-  router.get("/me", function (req, res) {
+  router.get("/me", async (req, res) => {
     if (!req.user) {
       res.json({ user: null, error: "User not found" });
     } else {
-      const {
-        email,
-        username,
-        social_profiles,
-        first_name,
-        last_name,
-        bio,
-        cover_photo,
-        profile_photo,
-        id,
-        friends,
-      } = req.user;
+      const user = await destructureUser(req.user);
       res.json({
-        user: {
-          email,
-          username,
-          social_profiles,
-          first_name,
-          last_name,
-          bio,
-          cover_photo,
-          profile_photo,
-          id,
-          friends,
-        },
+        user,
       });
     }
   });

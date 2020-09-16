@@ -10,32 +10,63 @@ const UserContext = createContext();
 
 export default function UserProvider({ children }) {
   const [user, setUser] = useState(undefined);
+  const [userId, setUserId] = useState("");
+  const [friends, setFriends] = useState([]);
+  const [friendRequests, seFriendRequests] = useState([]);
+  const [friendPending, setFriendPending] = useState([]);
   const [loading, setLoading] = useState(true);
   const [socket, setSocket] = useState(null);
-  const [userId, setUserId] = useState("");
 
-  const getUser = async () => {
-    const url = "/api/auth/me";
-    const res = await fetch(url);
-    const { user } = await res.json();
-    if (user) {
-      setUser(user);
-      setUserId(user.id);
-    }
-    setLoading(false);
+  const setUserState = (user) => {
+    setUser(user);
+    setUserId(user.id);
+    const { friends } = user;
+    console.log(friends);
+    let confirmedFriends = [];
+    let requestedFriends = [];
+    let pendingFriends = [];
+    friends.forEach((friend) => {
+      if (friend.status === "FRIENDS") {
+        confirmedFriends.push(friend);
+      } else if (friend.status === "REQUESTED") {
+        requestedFriends.push(friend);
+      } else if (friend.status === "PENDING") {
+        pendingFriends.push(friend);
+      }
+    });
+    console.log(
+      `confirmedFriends
+    requestedFriends
+    pendingFriends`,
+      confirmedFriends,
+      requestedFriends,
+      pendingFriends
+    );
+    setFriends(confirmedFriends);
+    setFriendPending(pendingFriends);
+    seFriendRequests(requestedFriends);
   };
+
   useEffect(() => {
+    const getUser = async () => {
+      const url = "/api/auth/me";
+      setLoading(true);
+      const res = await fetch(url);
+      const { user } = await res.json();
+      if (user) {
+        setUserState(user);
+      }
+      setLoading(false);
+    };
     getUser();
   }, []);
 
   useEffect(() => {
     const initSocket = async () => {
-      if (!socket) {
-        const ioSocket = await socketIOClient("/", {
-          query: { userId: user.id },
-        });
-        setSocket(ioSocket);
-      }
+      const ioSocket = await socketIOClient("/", {
+        query: { userId },
+      });
+      setSocket(ioSocket);
     };
     if (userId) {
       initSocket();
@@ -45,6 +76,10 @@ export default function UserProvider({ children }) {
   const logoutUser = useCallback(() => {
     setUser(undefined);
     setUserId("");
+    setSocket(null);
+    setFriends([]);
+    seFriendRequests([]);
+    setFriendPending([]);
   }, []);
 
   const loginUser = async ({ email, password }) => {
@@ -61,8 +96,7 @@ export default function UserProvider({ children }) {
       let { user } = data;
       if (user) {
         //  set user
-        setUser(user);
-        setUserId(user.id);
+        setUserState(user);
       }
     } catch (err) {
       console.log(err);
@@ -78,6 +112,9 @@ export default function UserProvider({ children }) {
         logoutUser,
         loginUser,
         socket,
+        friends,
+        friendRequests,
+        friendPending,
       }}
     >
       {children}

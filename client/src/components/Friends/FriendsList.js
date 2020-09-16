@@ -1,5 +1,5 @@
-import React, { useEffect, useState, Fragment } from "react";
-import { useFriends } from "../../context/friends";
+import React, { Fragment } from "react";
+import { useUser } from "../../context/user";
 import { makeStyles, Typography } from "@material-ui/core";
 import { UserAvatarAndName } from "./UserAvatarAndName";
 import { FriendBadge } from "./ActionButtons/FriendBadge";
@@ -20,25 +20,18 @@ const useFriendsListStyles = makeStyles((theme) => ({
 }));
 
 export function FriendsList() {
-  const [confirmedFriends, setConfirmedFriends] = useState([]);
   const classes = useFriendsListStyles();
-  const { friends } = useFriends();
-  useEffect(() => {
-    if (friends && friends.friends) {
-      setConfirmedFriends(friends.friends);
-    }
-  }, [friends]);
-
+  const { friends } = useUser();
   return (
     <Fragment>
       <Typography align="center" variant="h5">
         Friends
       </Typography>
-      {confirmedFriends.map((friend) => {
+      {friends.map((friend) => {
         return (
           <div key={friend._id}>
             <UserAvatarAndName
-              {...friend}
+              {...friend.recipient}
               containerClassNames={classes.usernameAndAvatar}
               textClassNames={classes.textClassNames}
               avatarClassNames={classes.avatar}

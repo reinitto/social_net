@@ -59,17 +59,17 @@ module.exports = function () {
       await Friends.findOneAndUpdate(
         { requester: UserA, recipient: UserB },
         { $set: { status: "FRIENDS", created: new Date() } }
-      ).exec();
+      );
       await Friends.findOneAndUpdate(
         { recipient: UserA, requester: UserB },
         { $set: { status: "FRIENDS", created: new Date() } }
-      ).exec();
+      );
       // create directConversation
       let newDm = DirectConversation.findOneAndUpdate({
         participants: [{ user: UserA }, { user: UserB }],
         conversationId: direct_conversationId(UserA, UserB),
       });
-      newDm.save();
+
       res.json({ status: "OK" });
     } catch (error) {
       console.log(error);

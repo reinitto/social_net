@@ -1,7 +1,8 @@
 const LocalStrategy = require("passport-local").Strategy;
 const User = require("../models/User");
-const getUserByEmail = (email) => User.findOne({ email }).select("+password");
-const getUserById = (id) => User.findById(id);
+const getUserByEmail = async (email) =>
+  await User.findOne({ email }).select("+password");
+const getUserById = async (id) => await User.findById(id);
 
 function initialize(passport) {
   const authenticateUser = async (email, password, done) => {

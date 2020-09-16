@@ -1,17 +1,19 @@
 import React, { Fragment } from "react";
 import { Typography } from "@material-ui/core";
+import { useUser } from "../../context/user";
 
 import { PendingUserItem } from "./PendingUserItem";
-export function PendingList({ users }) {
+export function PendingList() {
+  const { friendPending } = useUser();
   return (
     <Fragment>
-      {users && users.length > 0 ? (
+      {friendPending && friendPending.length > 0 ? (
         <Typography variant="h5" align="center">
           Pending Requests
         </Typography>
       ) : null}
-      {users.map((user) => (
-        <PendingUserItem key={user._id} user={user} />
+      {friendPending.map((user) => (
+        <PendingUserItem key={user._id} user={user.recipient} />
       ))}
     </Fragment>
   );
