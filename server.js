@@ -42,7 +42,7 @@ const sessionMiddleware = session({
   },
   store: new MongoStore({
     mongooseConnection: mongoose.connection,
-    ttl: 24 * 60,
+    ttl: 24 * 60 * 30,
   }),
 });
 const PORT = process.env.PORT || 5000;

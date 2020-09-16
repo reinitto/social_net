@@ -1,12 +1,13 @@
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Types.ObjectId;
+const User = require("../models/User");
+const Follow = require("../models/Follow");
+const Post = require("../models/Post");
+const express = require("express");
+const router = express.Router();
+
+const sortPosts = (a, b) => b.created - a.created;
 module.exports = function () {
-  const User = require("../models/User");
-  const Follow = require("../models/Follow");
-  const Post = require("../models/Post");
-  const express = require("express");
-  const router = express.Router();
-
-  const sortPosts = (a, b) => b.created - a.created;
-
   router.post("/edit", (req, res) => {
     const { data, updates_for } = req.body;
     const { email } = req.user;
@@ -104,7 +105,7 @@ module.exports = function () {
       // add follow id to user
       await User.findByIdAndUpdate(userId, {
         $addToSet: { follow: req.body.target },
-      }).exec();
+      });
       res.json({ status: "ok" });
     } catch (error) {
       console.log(error);
@@ -122,10 +123,10 @@ module.exports = function () {
       await Follow.findOneAndRemove({
         user: userId,
         target: req.body.target,
-      }).exec();
+      });
       await User.findByIdAndUpdate(userId, {
         $pull: { follow: req.body.target },
-      }).exec();
+      });
       res.json({ status: "ok" });
     } catch (error) {
       console.log(error);
@@ -136,23 +137,25 @@ module.exports = function () {
   router.get("/feed/:userId", async (req, res) => {
     try {
       const userId = req.params.userId;
-      let follows = await Follow.find({ user: userId }).exec();
-      let followings = follows.map((follow) => `${follow.target}`);
-      // add requested user posts
-      followings.push(userId);
-      followings = new Set(followings);
-      let feeds = [];
-      for (let following of followings) {
-        let posts = await Post.find({
-          $or: [{ creator: following }, { target: userId }],
-        })
-          .sort({ created: -1 })
-          .limit(100)
-          .exec();
-        feeds = [...feeds, ...posts];
-      }
-      feeds = feeds.sort(sortPosts);
-      res.json({ feed: feeds });
+      //get follow field which consists of User ids
+      //populate friends field and retrieve requester id which is a User id
+      const user = await User.findById(userId).populate({
+        path: "friends",
+        model: "Friends",
+        match: { status: "FRIENDS" },
+        select: " requester -_id",
+      });
+      let followIds = user.follow.length > 0 ? user.follow : [];
+      let friendsIds = user.friends.map((friend) => friend.requester);
+      let postCreatorIds = [...followIds, ...friendsIds, userId];
+      // find posts created by post creators
+      const newsFeedPosts = await Post.find({
+        $or: [{ creator: { $in: postCreatorIds } }, { target: userId }],
+      })
+        .sort({ created: -1 })
+        .limit(100)
+        .populate("creator");
+      res.json({ feed: newsFeedPosts });
     } catch (error) {
       res.json({ error });
     }
@@ -161,7 +164,7 @@ module.exports = function () {
   router.get("/:userId", async (req, res) => {
     try {
       const userId = req.params.userId;
-      const user = await User.findById(userId).exec();
+      const user = await User.findById(userId);
       res.json({ user });
     } catch (error) {
       console.log(error);

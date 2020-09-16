@@ -162,12 +162,11 @@ const useStyles = makeStyles((theme) => ({
 
 export default function PostCard({ post }) {
   const classes = useStyles();
-  const { user, logoutUser } = useUser();
+  const { user } = useUser();
   const [like, setLike] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [showComments, setShowComments] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
-  const [authorInfo, setAuthorInfo] = useState({});
   const anchorEl = useRef(null);
   const { body, image, likedBy, creator, comments, target } = post;
 
@@ -177,23 +176,6 @@ export default function PostCard({ post }) {
 
   useEffect(() => {
     let isRendered = true;
-    const getPostCreatorInfo = async (id) => {
-      const res = await getUserInfo(id);
-      if (res.notAuthenticated) {
-        logoutUser();
-      } else {
-        const { user } = res;
-        if (user) {
-          user.profile_photo = user.profile_photo.replace(
-            "upload",
-            "upload/w_1000,h_1000,c_crop,g_face/w_100"
-          );
-        }
-        if (isRendered) {
-          setAuthorInfo(user);
-        }
-      }
-    };
     if (likedBy) {
       if (likedBy.includes(user.id)) {
         setLike(true);
@@ -202,15 +184,9 @@ export default function PostCard({ post }) {
     } else {
       setLikeCount(0);
     }
-    if (creator) {
-      try {
-        getPostCreatorInfo(creator);
-      } catch (error) {
-        console.log(error);
-      }
-    }
+
     return () => (isRendered = false);
-  }, [user, likedBy, creator]);
+  }, [user, likedBy]);
 
   const commentInputRef = useRef(null);
   const toggleComments = () => {
@@ -266,7 +242,7 @@ export default function PostCard({ post }) {
     };
     await fetch(url.href, options);
   };
-  const { profile_photo, first_name, last_name, username, _id } = authorInfo;
+  const { profile_photo, first_name, last_name, username, _id } = creator;
 
   return (
     <Card className={classes.root}>
