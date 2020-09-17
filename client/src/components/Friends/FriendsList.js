@@ -37,7 +37,7 @@ export function FriendsList() {
               avatarClassNames={classes.avatar}
             >
               <FriendBadge
-                friendId={friend._id}
+                friendId={friend.recipient._id}
                 sideMenuPlacement="bottom-start"
               />
             </UserAvatarAndName>
