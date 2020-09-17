@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import dayjs from "dayjs";
 import { Button, Tooltip, makeStyles } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import ChatIcon from "@material-ui/icons/Chat";
@@ -6,7 +7,10 @@ import { UserAvatarAndName } from "../Friends/UserAvatarAndName";
 import { useUser } from "../../context/user";
 import { useConversations } from "../../context/conversations";
 import calculateDmId from "../utils/calculateDmId";
+var relativeTime = require("dayjs/plugin/relativeTime");
+dayjs.extend(relativeTime);
 const useContactItemStyles = makeStyles((theme) => {
+  console.log(theme);
   return {
     contactItemContainer: {
       display: "inline-flex",
@@ -20,6 +24,7 @@ const useContactItemStyles = makeStyles((theme) => {
     avatarContainer: {
       display: "inline-flex",
       alignItems: "center",
+      position: "relative",
     },
     link: {
       display: "inline",
@@ -28,6 +33,20 @@ const useContactItemStyles = makeStyles((theme) => {
       "&:hover": {
         textDecoration: "underline",
       },
+    },
+    isOnlinedot: {
+      height: 20,
+      width: 20,
+      backgroundColor: theme.palette.success.main,
+      borderRadius: "50%",
+      borderStyle: "solid",
+      borderColor: "white",
+      borderWidth: 2,
+      display: "inline-block",
+      position: "absolute",
+      left: 3.5,
+      top: 3.5,
+      zIndex: 1000,
     },
   };
 });
@@ -53,12 +72,18 @@ export function ContactsItem({ contact }) {
   const { openChat, hasNewMessages } = useConversations();
   const { userId } = useUser();
   const [chatId, setChatId] = useState(null);
+  const [isOnline, setIsOnline] = useState(false);
   const [newMessages, setNewMessages] = useState(false);
   const chatIconClasses = useChatIconStyle(newMessages);
   const contactId = contact._id;
   useEffect(() => {
     if (userId && contactId) {
       setChatId(calculateDmId(userId, contactId));
+      let now = dayjs();
+      let last = dayjs(contact.last_online);
+      // 5min in miliseconds
+      let onlineTreshHold = 1000 * 60 * 5;
+      setIsOnline(now.diff(last) < onlineTreshHold);
     }
   }, [userId, contactId]);
   useEffect(() => {
@@ -76,7 +101,9 @@ export function ContactsItem({ contact }) {
         <UserAvatarAndName
           {...contact}
           containerClassNames={classes.avatarContainer}
-        />
+        >
+          {isOnline ? <div className={classes.isOnlinedot}></div> : null}
+        </UserAvatarAndName>
       </Link>
       <Tooltip title={newMessages ? "New messages" : "No new Messages"}>
         <Button onClick={addConversation} className={classes.chatButton}>

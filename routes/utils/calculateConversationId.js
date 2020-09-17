@@ -3,4 +3,5 @@ const direct_conversationId = (userId, receiverId) => {
     ? `${receiverId}${userId}`
     : `${userId}${receiverId}`;
 };
+
 module.exports = { direct_conversationId };

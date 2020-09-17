@@ -11,10 +11,12 @@ const mailjet = require("node-mailjet").connect(
 const getUserFriends = async (friendshipIds) => {
   const friendships = await Friends.find({
     _id: { $in: friendshipIds },
-  }).populate({
-    path: "recipient",
-    model: "User",
-  });
+  })
+    .populate({
+      path: "recipient",
+      model: "User",
+    })
+    .sort("last_online");
   return friendships;
 };
 const sendRegistrationEmail = async ({ username, email }) => {
@@ -55,6 +57,7 @@ const destructureUser = async (userObj) => {
     cover_photo = "",
     profile_photo = "",
     id = "",
+    last_online = 0,
     friends = [],
   } = userObj;
   const friendshipIds = friends.map((friend) => friend._id);
@@ -69,6 +72,7 @@ const destructureUser = async (userObj) => {
     cover_photo,
     profile_photo,
     id,
+    last_online,
     friends: friendships,
   };
 };

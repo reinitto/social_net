@@ -40,6 +40,7 @@ var UserSchema = new Schema({
   follow: { type: [Schema.Types.ObjectId], ref: "User" },
   friends: { type: [Schema.Types.ObjectId], ref: "Friends" },
   created: { type: Date, default: Date.now },
+  last_online: { type: Date, default: Date.now },
 });
 
 UserSchema.pre("save", function (next) {

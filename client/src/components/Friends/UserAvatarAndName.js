@@ -12,10 +12,6 @@ const useDefaultStyles = makeStyles((theme) => ({
     margin: 8,
   },
 }));
-// user.profile_photo = user.profile_photo.replace(
-//     "upload",
-//     "upload/w_1000,h_1000,c_crop,g_face/w_100"
-//   );
 
 export function UserAvatarAndName({
   username = "",
@@ -40,7 +36,10 @@ export function UserAvatarAndName({
     <div className={containerClassNames || defaultClasses.container}>
       {profile_photo ? (
         <Avatar
-          src={profile_photo}
+          src={profile_photo.replace(
+            "upload",
+            "upload/w_1000,h_1000,c_crop,g_face/w_40"
+          )}
           className={avatarClassNames || defaultClasses.avatar}
           variant="circle"
         />

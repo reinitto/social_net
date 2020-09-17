@@ -10,7 +10,6 @@ module.exports = function () {
   const Friends = require("../models/Friends");
   const DirectConversation = require("../models/DirectConversation");
   const express = require("express");
-  const mongoose = require("mongoose");
   const router = express.Router();
   // send friend request
   router.post("/add", async (req, res) => {
@@ -106,85 +105,6 @@ module.exports = function () {
       res.json({ error });
     }
   });
-
-  // router.post("/friendsList", async (req, res) => {
-  //   if (!req.body || !req.body.friendsIds) {
-  //     res.status(422).json({ error: "Missing required parameters" });
-  //     return;
-  //   }
-  //   try {
-  //     let ids = req.body.friendsIds.map((id) => ObjectId(id));
-  //     let userId = req.user._id;
-
-  //     // From friends collection find all matching documents
-  //     // then, if status is FRIENDS take the recipient field and use as _id to match documents in User collection and return as an array of confirmed friends
-  //     // let userFriends = await Friends.find({ _id: { $in: ids } });
-  //     // console.log("user friendships", userFriends);
-  //     let userFriends = await Friends.aggregate([
-  //       {
-  //         $match: {
-  //           _id: { $in: ids },
-  //         },
-  //       },
-  //       { $group: { _id: "$status", friends: { $push: "$$ROOT" } } },
-  //       // {
-  //       //   $lookup:{
-  //       //     from:User.collection.name,
-  //       //     let:{status:"$_id",friends:"$friends"},
-
-  //       //   }
-  //       // }
-  //       // {
-  //       //   $lookup:{
-  //       //     from:User.collection.name,
-  //       //     let:{status:"$status",recipient:"$recipient"},
-  //       //     pipeline:{
-  //       //       $match:{
-
-  //       //       }
-  //       //     },
-  //       //     as:"friends_list"
-  //       //   }
-  //       // }
-  //       // {
-  //       //   $project: {
-  //       //     _id: 0,
-  //       //     requester: 1,
-  //       //     recipient: 1,
-  //       //     status: 1,
-  //       //   },
-  //       // },
-  //     ]);
-  //     let friendLists = {};
-  //     // console.log("userFriends", userFriends);
-  //     userFriends.forEach(async (col) => {
-  //       if (col._id === "PENDING") {
-  //         friendLists.pending = col.friends.map(
-  //           (friendship) => friendship.recipient
-  //         );
-  //       }
-  //       if (col._id === "REQUESTED") {
-  //         friendLists.requested = col.friends.map(
-  //           (friendship) => friendship.recipient
-  //         );
-  //       }
-  //       if (col._id === "FRIENDS") {
-  //         friendLists.friendsIds = col.friends.map(
-  //           (friendship) => friendship.recipient
-  //         );
-  //       }
-  //     });
-  //     if (friendLists["friendsIds"] && friendLists["friendsIds"].length > 0) {
-  //       friendLists.friends = await User.find({
-  //         _id: { $in: friendLists.friendsIds },
-  //       });
-  //     }
-  //     res.json({ friendLists: friendLists });
-  //   } catch (error) {
-  //     console.log(error);
-  //     res.json({ error: "couldnt get friends" });
-  //   }
-  // });
 
   return router;
 };

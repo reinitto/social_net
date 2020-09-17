@@ -15,6 +15,7 @@ const post = require("./routes/post");
 const friends = require("./routes/friends");
 const chat = require("./routes/chat");
 const initializePassport = require("./passport/passport-config");
+const { update_last_online } = require("./routes/utils/updateLastOnline");
 const {
   direct_conversationId,
 } = require("./routes/utils/calculateConversationId");
@@ -30,6 +31,10 @@ const isAuthenticated = (req, res, next) => {
     return next();
   }
   res.json({ notAuthenticated: true });
+};
+const updateLastOnline = async (req, res, next) => {
+  await update_last_online(req.user._id);
+  next();
 };
 
 const sessionMiddleware = session({
@@ -67,10 +72,10 @@ app.use(passport.session());
 app.set("socketio", io);
 // app.use(logger);
 app.use("/api/auth", auth(passport));
-app.use("/api/user", isAuthenticated, user());
-app.use("/api/post", isAuthenticated, post());
-app.use("/api/friends", isAuthenticated, friends());
-app.use("/api/chat", isAuthenticated, chat());
+app.use("/api/user", isAuthenticated, updateLastOnline, user());
+app.use("/api/post", isAuthenticated, updateLastOnline, post());
+app.use("/api/friends", isAuthenticated, updateLastOnline, friends());
+app.use("/api/chat", isAuthenticated, updateLastOnline, chat());
 //Configure Mongoose
 mongoose.connect(
   process.env.MONGODB_URI,
@@ -103,9 +108,9 @@ io.on("connection", async (socket) => {
   const roomIds = friendIds.map((friendId) =>
     direct_conversationId(friendId, userId)
   );
-  console.log("roomIds", roomIds);
+  // console.log("roomIds", roomIds);
   socket.join(roomIds, () => {
-    console.log(userId, "joined rooms", socket.rooms);
+    // console.log(userId, "joined rooms", socket.rooms);
   });
   io.of("/").clients((error, clients) => {
     if (error) throw error;
