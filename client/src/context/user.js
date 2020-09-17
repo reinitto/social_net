@@ -4,6 +4,7 @@ import React, {
   useContext,
   useEffect,
   useCallback,
+  useRef,
 } from "react";
 import socketIOClient from "socket.io-client";
 const UserContext = createContext();
@@ -34,14 +35,6 @@ export default function UserProvider({ children }) {
         pendingFriends.push(friend);
       }
     });
-    console.log(
-      `confirmedFriends
-    requestedFriends
-    pendingFriends`,
-      confirmedFriends,
-      requestedFriends,
-      pendingFriends
-    );
     setFriends(confirmedFriends);
     setFriendPending(pendingFriends);
     seFriendRequests(requestedFriends);

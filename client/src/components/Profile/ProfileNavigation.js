@@ -10,7 +10,6 @@ import {
 import { followUser } from "../utils/follows/followUser";
 import { unFollowUser } from "../utils/follows/unFollowUser";
 import { useUser } from "../../context/user";
-import { useFriends } from "../../context/friends";
 import Newsfeed from "../Newsfeed";
 import About from "./About";
 import { AddFriend } from "../Friends/ActionButtons/AddFriendButton";
@@ -46,11 +45,9 @@ const useStyle = makeStyles((theme) => ({
 
 function ProfileNavigation({ follow = [], profile = {}, profileId }) {
   const classes = useStyle();
-  const { user } = useUser();
-  const { friends } = useFriends();
+  const { user, userId } = useUser();
   const [isFollowing, setIsFollowing] = useState(false);
   const [tabIndex, setTabIndex] = useState(0);
-  const userId = (user && user.id) || null;
   const handleChangeTab = (event, newValue) => {
     setTabIndex(newValue);
   };
@@ -90,8 +87,8 @@ function ProfileNavigation({ follow = [], profile = {}, profileId }) {
           <Tab label="About" />
         </Tabs>
         <div className={classes.actions}>
-          {user && profileId !== user.id ? (
-            <AddFriend friendId={profileId} friends={friends} />
+          {user && profileId !== userId ? (
+            <AddFriend friendId={profileId} />
           ) : null}
           <MenuItem onClick={toggleFollow}>
             {isFollowing ? "Unfollow" : "Follow"}

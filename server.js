@@ -35,14 +35,15 @@ const isAuthenticated = (req, res, next) => {
 const sessionMiddleware = session({
   secret: "fraggle-rock",
   resave: true,
+  rolling: true,
   saveUninitialized: false,
   cookie: {
     secure: false,
-    maxAge: 24 * 60 * 30,
+    maxAge: 24 * 60 * 30 * 60,
   },
   store: new MongoStore({
     mongooseConnection: mongoose.connection,
-    ttl: 24 * 60 * 30,
+    ttl: 24 * 60 * 30 * 60,
   }),
 });
 const PORT = process.env.PORT || 5000;
