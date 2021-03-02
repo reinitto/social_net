@@ -24,8 +24,8 @@ var UserSchema = new Schema({
   password: {
     type: String,
     required: true,
-    minlength: [8, "Invalid password"],
-    maxlength: [255, "Invalid password"],
+    minlength: [8, "Password too short"],
+    maxlength: [255, "Password too long"],
     select: false,
   },
   first_name: { type: String },
